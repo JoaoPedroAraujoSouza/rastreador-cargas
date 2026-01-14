@@ -1,0 +1,59 @@
+.sidebar {
+  width: 300px;
+  background-color: var(--primary-dark);
+  color: var(--text-white);
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.sidebar h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 24px;
+  border-bottom: 2px solid var(--primary-blue);
+  padding-bottom: 10px;
+}
+
+.motoristas-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.motorista-item {
+  background-color: var(--primary-dark-light);
+  padding: 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.motorista-item:hover {
+  background-color: var(--primary-dark-lighter);
+  transform: translateX(5px);
+}
+
+.motorista-item.ativo {
+  background-color: var(--primary-blue);
+  border-color: var(--primary-blue-dark);
+}
+
+.motorista-nome {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.motorista-tipo {
+  font-size: 12px;
+  color: var(--text-light-gray);
+  text-transform: uppercase;
+}
+
+.sem-motoristas {
+  color: var(--text-medium-gray);
+  font-style: italic;
+  text-align: center;
+  margin-top: 20px;
+}

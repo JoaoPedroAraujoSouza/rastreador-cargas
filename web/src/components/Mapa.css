@@ -1,0 +1,30 @@
+.btn-recentralizar {
+  position: absolute;
+  bottom: 2rem;
+  right: 1.5rem;
+  z-index: 1000;
+  background-color: var(--text-white);
+  color: var(--primary-dark);
+  border: 0.125rem solid var(--primary-blue);
+  padding: 0.75rem;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-recentralizar:hover {
+  background-color: var(--primary-blue);
+  transform: scale(1.1);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-recentralizar:active {
+  transform: scale(0.95);
+}
