@@ -2,6 +2,7 @@ package com.rastreador.backend.model;
 
 import com.rastreador.backend.enums.UserType;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
