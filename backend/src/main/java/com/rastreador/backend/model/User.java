@@ -20,11 +20,13 @@ public class User {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false)
     private String username;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private UserType userType;
 
-    //TODO: Encrypt password using BCrypt
+    @Column(nullable = false)
     private String password;
 }

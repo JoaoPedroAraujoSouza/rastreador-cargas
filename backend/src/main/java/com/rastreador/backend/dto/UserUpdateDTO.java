@@ -1,6 +1,7 @@
 package com.rastreador.backend.dto;
 
 import com.rastreador.backend.enums.UserType;
+
 import jakarta.validation.constraints.Size;
 
 public record UserUpdateDTO(
@@ -9,7 +10,6 @@ public record UserUpdateDTO(
 
         UserType userType,
 
-        //@Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
         String password
 ) {
 }
