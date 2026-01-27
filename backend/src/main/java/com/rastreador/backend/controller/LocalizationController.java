@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.List;
 public class LocalizationController {
 
     private final LocalizationService localizationService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping
     @Operation(summary = "Create new location", description = "Saves a new GPS location from Android app")
@@ -33,7 +35,15 @@ public class LocalizationController {
     })
     public ResponseEntity<LocalizationResponseDTO> createLocalization(@Valid @RequestBody LocalizationCreateDTO dto) {
         log.info("Saving new location for user ID: {}", dto.userId());
+
+        // 1. Salva no banco (seu código atual)
         LocalizationResponseDTO localization = localizationService.createLocalization(dto);
+
+        // 2. Envia para o WebSocket em tempo real
+        // O frontend estará inscrito em: /topic/driver/{userId}
+        String destination = "/topic/driver/" + dto.userId();
+        messagingTemplate.convertAndSend(destination, localization);
+
         return ResponseEntity.status(201).body(localization);
     }
 
