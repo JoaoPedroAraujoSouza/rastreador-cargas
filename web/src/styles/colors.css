@@ -18,6 +18,7 @@
   
   --shadow-sm: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-md: 0 8px 12px rgba(0, 0, 0, 0.15);
+  --shadow-icon: 0 2px 8px rgba(0, 0, 0, 0.3);
   
   --overlay-dark: rgba(0, 0, 0, 0.5);
 }

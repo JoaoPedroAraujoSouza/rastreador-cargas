@@ -28,3 +28,65 @@
 .btn-recentralizar:active {
   transform: scale(0.95);
 }
+
+.custom-truck-icon {
+  background: transparent;
+  border: none;
+}
+
+.custom-truck-icon:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+.truck-icon-wrapper {
+  background-color: var(--primary-blue);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--text-white);
+  box-shadow: var(--shadow-icon);
+  color: var(--text-white);
+  font-size: 24px;
+}
+
+.custom-admin-icon {
+  background: transparent;
+  border: none;
+}
+
+.custom-admin-icon:hover {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+.admin-icon-wrapper {
+  background-color: var(--success-green);
+  border-radius: 50%;
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--text-white);
+  box-shadow: var(--shadow-icon);
+  color: var(--text-white);
+  font-size: 20px;
+}
+
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 150px;
+}
+
+.popup-datetime {
+  font-size: 12px;
+  color: var(--text-medium-gray);
+  font-weight: normal;
+  margin-top: 4px;
+}

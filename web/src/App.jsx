@@ -3,20 +3,11 @@ import './App.css';
 import Sidebar from './components/sidebar/Sidebar';
 import Mapa from './components/Mapa';
 import { getMotoristas, getLocalizacaoHistorico } from './services/api';
-
-const MOTORISTAS_MOCK = [
-  { id: 1, nome: "João Silva", tipo: "MOTORISTA" },
-  { id: 2, nome: "Maria Santos", tipo: "MOTORISTA" },
-  { id: 3, nome: "Pedro Oliveira", tipo: "MOTORISTA" }
-];
-
-const LOCALIZACOES_MOCK = {
-  1: [{ latitude: -23.5505, longitude: -46.6333, dataHora: "2026-01-14T10:30:00" }],
-  2: [{ latitude: -22.9068, longitude: -43.1729, dataHora: "2026-01-14T11:15:00" }],
-  3: [{ latitude: -19.9167, longitude: -43.9345, dataHora: "2026-01-14T09:45:00" }]
-};
-
-const USE_MOCK = true;
+import { 
+  USE_MOCK, 
+  getMotoristaMock, 
+  getLocalizacaoHistoricoMock 
+} from './services/mockData';
 
 function App() {
   const [motoristas, setMotoristas] = useState([]);
@@ -31,8 +22,8 @@ function App() {
         setLoading(true);
         
         if (USE_MOCK) {
-          await new Promise(resolve => setTimeout(resolve, 500));
-          setMotoristas(MOTORISTAS_MOCK);
+          const data = await getMotoristaMock();
+          setMotoristas(data);
           setError(null);
         } else {
           const data = await getMotoristas();
@@ -50,15 +41,10 @@ function App() {
     fetchMotoristas();
   }, []);
 
-  const handleSelectMotorista = async (motorista) => {
-    setMotoristaSelecionado(motorista);
-    
+  const fetchLocalizacao = async (motorista) => {
     try {
-      setLoading(true);
-      
       if (USE_MOCK) {
-        await new Promise(resolve => setTimeout(resolve, 300));
-        const historicoLocalizacoes = LOCALIZACOES_MOCK[motorista.id];
+        const historicoLocalizacoes = await getLocalizacaoHistoricoMock(motorista.id);
         
         if (historicoLocalizacoes && historicoLocalizacoes.length > 0) {
           const ultimaLocalizacao = historicoLocalizacoes[0];
@@ -92,9 +78,23 @@ function App() {
       console.error('Erro ao buscar localização:', err);
       setError('Erro ao carregar localização do motorista.');
       setLocalizacao(null);
-    } finally {
-      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    if (!motoristaSelecionado) return;
+
+    fetchLocalizacao(motoristaSelecionado);
+
+    const intervalId = setInterval(() => {
+      fetchLocalizacao(motoristaSelecionado);
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [motoristaSelecionado]);
+
+  const handleSelectMotorista = (motorista) => {
+    setMotoristaSelecionado(motorista);
   };
 
   return (
@@ -111,6 +111,7 @@ function App() {
           latitude={localizacao?.latitude}
           longitude={localizacao?.longitude}
           nomeMotorista={motoristaSelecionado?.nome}
+          dataHora={localizacao?.dataHora}
         />
       </div>
     </div>
