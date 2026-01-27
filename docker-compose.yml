@@ -1,4 +1,25 @@
 services:
+  # Serviço da Aplicação (Seu Backend)
+  app:
+    container_name: rastreador-backend
+    build: .             # Procura o Dockerfile na pasta atual
+    restart: on-failure
+    ports:
+      - "8080:8080"      # Expõe a porta 8080
+    environment:
+      # Sobrescreve as configs do application.properties para rodar no Docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rastreador_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      # Mantém o JWT igual (ou você pode injetar via secrets em produção)
+      JWT_SECRET: ${JWT_SECRET:-5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437}
+      JWT_EXPIRATION: 86400000
+    depends_on:
+      - db
+    networks:
+      - rastreador-network
+
+  # Banco de Dados
   db:
     image: postgres:15-alpine
     container_name: rastreador-postgres
@@ -11,7 +32,10 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rastreador-network
 
+  # Interface visual para o Banco (Opcional, mas útil)
   pgadmin:
     image: dpage/pgadmin4
     container_name: rastreador-pgadmin
@@ -22,6 +46,12 @@ services:
       - "5050:80"
     depends_on:
       - db
+    networks:
+      - rastreador-network
 
 volumes:
   postgres_data:
+
+networks:
+  rastreador-network:
+    driver: bridge

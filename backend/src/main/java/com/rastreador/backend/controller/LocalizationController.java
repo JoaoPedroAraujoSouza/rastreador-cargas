@@ -10,6 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +31,7 @@ public class LocalizationController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @PostMapping
-    @Operation(summary = "Create new location", description = "Saves a new GPS location from Android app")
+    @Operation(summary = "Create new location", description = "Saves GPS location and broadcasts it via WebSocket")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Location saved successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input data"),
@@ -36,11 +40,8 @@ public class LocalizationController {
     public ResponseEntity<LocalizationResponseDTO> createLocalization(@Valid @RequestBody LocalizationCreateDTO dto) {
         log.info("Saving new location for user ID: {}", dto.userId());
 
-        // 1. Salva no banco (seu código atual)
         LocalizationResponseDTO localization = localizationService.createLocalization(dto);
 
-        // 2. Envia para o WebSocket em tempo real
-        // O frontend estará inscrito em: /topic/driver/{userId}
         String destination = "/topic/driver/" + dto.userId();
         messagingTemplate.convertAndSend(destination, localization);
 
@@ -48,23 +49,22 @@ public class LocalizationController {
     }
 
     @GetMapping("/user/{userId}")
-    @Operation(summary = "Get all locations by user", description = "Retrieves all GPS locations for a specific user")
+    @Operation(summary = "Get location history (Paginated)", description = "Retrieves GPS history paginated. Default: 20 items per page, ordered by newest.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Locations retrieved successfully"),
+            @ApiResponse(responseCode = "200", description = "History retrieved successfully"),
             @ApiResponse(responseCode = "404", description = "User not found")
     })
-    public ResponseEntity<List<LocalizationResponseDTO>> getLocalizationsByUserId(@PathVariable Long userId) {
-        log.info("Fetching all locations for user ID: {}", userId);
-        List<LocalizationResponseDTO> localizations = localizationService.getLocalizationsByUserId(userId);
+    public ResponseEntity<Page<LocalizationResponseDTO>> getLocalizationsByUserId(
+            @PathVariable Long userId,
+            @PageableDefault(size = 20, sort = "timestamp", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        log.info("Fetching paged locations for user ID: {}", userId);
+        Page<LocalizationResponseDTO> localizations = localizationService.getLocalizationsByUserId(userId, pageable);
         return ResponseEntity.ok(localizations);
     }
 
     @GetMapping("/user/{userId}/latest")
-    @Operation(summary = "Get latest location", description = "Retrieves the most recent GPS location for a user")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Latest location retrieved successfully"),
-            @ApiResponse(responseCode = "404", description = "User or location not found")
-    })
+    @Operation(summary = "Get latest location", description = "Retrieves the single most recent GPS location")
     public ResponseEntity<LocalizationResponseDTO> getLatestLocationByUserId(@PathVariable Long userId) {
         log.info("Fetching latest location for user ID: {}", userId);
         LocalizationResponseDTO localization = localizationService.getLatestLocationByUserId(userId);
@@ -73,13 +73,17 @@ public class LocalizationController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete location", description = "Deletes a specific GPS location record")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Location deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Location not found")
-    })
     public ResponseEntity<Void> deleteLocalization(@PathVariable Long id) {
         log.info("Deleting location with id: {}", id);
         localizationService.deleteLocalization(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/batch")
+    @Operation(summary = "Batch insert locations", description = "Saves multiple GPS locations at once (useful for offline sync)")
+    public ResponseEntity<Integer> createBatchLocalizations(@Valid @RequestBody List<LocalizationCreateDTO> dtos) {
+        log.info("Received batch of {} locations", dtos.size());
+        int savedCount = localizationService.createBatchLocalizations(dtos);
+        return ResponseEntity.status(201).body(savedCount);
     }
 }

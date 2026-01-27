@@ -4,6 +4,7 @@ import com.rastreador.backend.model.User;
 import com.rastreador.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,15 +23,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
+    @Cacheable("users")
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.debug("Carregando usuário: {}", username);
-        
+        log.debug("Buscando usuário no banco de dados (Cache Miss): {}", username);
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
-        
+
         return buildUserDetails(user);
     }
-    
+
     private UserDetails buildUserDetails(User user) {
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
@@ -42,7 +44,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .disabled(false)
                 .build();
     }
-    
+
+    // Converte o Enum UserType (ADMIN/DRIVER) para Role do Spring
     private Collection<? extends GrantedAuthority> getAuthorities(User user) {
         String role = "ROLE_" + user.getUserType().name();
         return List.of(new SimpleGrantedAuthority(role));

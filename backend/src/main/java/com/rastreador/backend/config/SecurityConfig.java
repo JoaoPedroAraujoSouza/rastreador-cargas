@@ -4,6 +4,7 @@ import com.rastreador.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -27,23 +28,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // Habilita o CORS usando as configurações padrão (ou seu CorsConfig.java se definido corretamente)
+                .cors(Customizer.withDefaults())
+
                 .csrf(csrf -> csrf.disable())
-                
+
                 .authorizeHttpRequests(auth -> auth
+                        // Rotas públicas
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers("ws-tracker/**").permitAll()
-                        .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers("/api/localizations/**").authenticated()
+
+                        // WebSocket Handshake (Segurança é feita via STOMP Interceptor)
+                        .requestMatchers("/ws-tracker/**").permitAll()
+
+                        // Rotas protegidas
                         .anyRequest().authenticated()
                 )
-                
+
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                
+
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        
+
         return http.build();
     }
 }
