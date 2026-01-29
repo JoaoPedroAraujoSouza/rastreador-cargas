@@ -21,6 +21,9 @@ public record UserCreateDTO(
         String email,
 
         @NotNull(message = "Este campo é obrigatório.")
-        String document
+        String document,
+
+        @NotNull(message = "Este campo é obrigatório.")
+        String fullname
 ) {
 }

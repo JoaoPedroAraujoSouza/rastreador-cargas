@@ -92,4 +92,10 @@ public class VehicleService {
         }
         vehicleRepository.deleteById(id);
     }
+
+    public List<VehicleResponseDTO> getVehiclesByLicensePlate(String licensePlate) {
+        return vehicleRepository.findByLicensePlate(licensePlate.toUpperCase()).stream()
+                .map(VehicleResponseDTO::fromEntity)
+                .toList();
+    }
 }

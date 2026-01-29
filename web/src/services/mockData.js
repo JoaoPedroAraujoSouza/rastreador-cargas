@@ -1,4 +1,4 @@
-export const USE_MOCK = true;
+export const USE_MOCK = false;
 
 export const MOTORISTAS_MOCK = [
   { id: 1, nome: "João Silva", tipo: "MOTORISTA" },
@@ -8,7 +8,7 @@ export const MOTORISTAS_MOCK = [
   { id: 5, nome: "Carlos Souza", tipo: "MOTORISTA" }
 ];
 
-export const LOCALIZACOES_MOCK = {
+export const LOCALIZACOES_MOCK  = {
   1: [
     { 
       latitude: -23.5505, 

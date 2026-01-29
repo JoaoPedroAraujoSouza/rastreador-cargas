@@ -10,4 +10,5 @@ import java.util.List;
 public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     List<Vehicle> findByOwnerId(Long ownerId);
     boolean existsByLicensePlate(String licensePlate);
+    List<Vehicle> findByLicensePlate(String licensePlate);
 }

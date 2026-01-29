@@ -1,5 +1,6 @@
 package com.rastreador.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.rastreador.backend.enums.UserType;
 
 import jakarta.persistence.*;
@@ -29,4 +30,12 @@ public class User {
 
     @Column(nullable = false, unique = true)
     private String document;
+
+    @Column(name = "full_name",nullable = false)
+    private String fullname;
+
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    @JsonIgnore
+    private User manager;
 }

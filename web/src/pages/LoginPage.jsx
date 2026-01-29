@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaUser, FaLock, FaTruckMoving, FaMapMarkedAlt } from 'react-icons/fa'; // Ícones
+import { FaUser, FaLock, FaTruckMoving, FaMapMarkedAlt, FaWhatsapp } from 'react-icons/fa';
 import './Auth.css';
 
 const LoginPage = () => {
@@ -23,35 +23,43 @@ const LoginPage = () => {
             navigate('/');
         } catch (err) {
             console.error(err);
-            setError('Credenciais inválidas. Verifique seu usuário e senha.');
+            setError('Acesso negado. Verifique suas credenciais.');
         } finally {
             setIsLoading(false);
         }
     };
 
+    const handleRequestAccess = () => {
+        window.open('https://wa.me/5581992281988?text=Olá, tenho interesse na plataforma de rastreamento.', '_blank');
+    };
+
     return (
         <div className="auth-page">
-            {/* Seção Esquerda: Formulário */}
             <div className="auth-form-section">
                 <div className="auth-card">
                     <div className="auth-header">
                         <div className="auth-logo">
                             <FaTruckMoving /> <span>FleetTrack</span>
                         </div>
-                        <h2>Bem-vindo de volta</h2>
-                        <p>Insira suas credenciais para acessar o painel.</p>
+                        <h2>Acesso Restrito</h2>
+                        <p>Plataforma exclusiva para transportadoras parceiras.</p>
                     </div>
 
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label>Usuário</label>
+                            <label>Usuário Corporativo</label>
                             <div className="input-wrapper">
-                                <FaUser className="input-icon" />
+                                {/* O ícone só aparece se o campo estiver vazio */}
+                                <FaUser
+                                    className="input-icon"
+                                    style={{ display: username ? 'none' : 'block' }}
+                                />
                                 <input
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Seu nome de usuário"
+                                    // Placeholder descritivo e moderno
+                                    placeholder={username ? "" : "Ex: transportadora_exemplo"}
                                     required
                                     autoFocus
                                 />
@@ -61,12 +69,16 @@ const LoginPage = () => {
                         <div className="form-group">
                             <label>Senha</label>
                             <div className="input-wrapper">
-                                <FaLock className="input-icon" />
+                                {/* O ícone só aparece se o campo estiver vazio */}
+                                <FaLock
+                                    className="input-icon"
+                                    style={{ display: password ? 'none' : 'block' }}
+                                />
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="••••••••"
+                                    placeholder={password ? "" : "Sua senha de acesso"}
                                     required
                                 />
                             </div>
@@ -87,26 +99,31 @@ const LoginPage = () => {
                         )}
 
                         <button type="submit" className="btn-primary" disabled={isLoading}>
-                            {isLoading ? 'Entrando...' : 'Acessar Plataforma'}
+                            {isLoading ? 'Autenticando...' : 'Acessar Painel'}
                         </button>
                     </form>
 
                     <div className="auth-footer">
-                        Não tem uma conta corporativa?
-                        <span className="auth-link" onClick={() => navigate('/register')}>Criar cadastro</span>
+                        Ainda não é parceiro?
+                        <div
+                            className="auth-link"
+                            onClick={handleRequestAccess}
+                            style={{display: 'inline-flex', alignItems: 'center', gap: '5px', verticalAlign: 'middle', cursor: 'pointer'}}
+                        >
+                            <FaWhatsapp /> Solicitar Demonstração
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Seção Direita: Branding */}
             <div className="auth-brand-section">
                 <div className="brand-bg-pattern"></div>
                 <div className="brand-content">
                     <FaMapMarkedAlt className="brand-icon-large" />
-                    <h1>Rastreamento Inteligente em Tempo Real</h1>
+                    <h1>Gestão de Frotas de Elite</h1>
                     <p>
-                        Monitore sua frota, otimize rotas e garanta a segurança da sua carga
-                        com nossa tecnologia de ponta.
+                        Segurança total e controle em tempo real. <br/>
+                        O acesso a esta plataforma é restrito a administradores autorizados.
                     </p>
                 </div>
             </div>

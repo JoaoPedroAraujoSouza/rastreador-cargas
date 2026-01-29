@@ -7,7 +7,8 @@ public record UserResponseDTO(
     String username,
     UserType userType,
     String email,
-    String document
+    String document,
+    String fullname
 ) {
         public static UserResponseDTO fromEntity(com.rastreador.backend.model.User user) {
             return new UserResponseDTO(
@@ -15,7 +16,8 @@ public record UserResponseDTO(
                 user.getUsername(),
                 user.getUserType(),
                 user.getEmail(),
-                user.getDocument()
+                user.getDocument(),
+                user.getFullname()
             );
         }
     }

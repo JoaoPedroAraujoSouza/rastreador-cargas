@@ -7,17 +7,19 @@ const RegisterDriverModal = ({ onClose, onSuccess }) => {
     const [step, setStep] = useState(1);
     const [error, setError] = useState('');
     const [createdDriverId, setCreatedDriverId] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    // Estado para Dados do Motorista (User Entity)
+    // Estado para Dados do Motorista
     const [driverData, setDriverData] = useState({
         username: '',
+        fullname: '', // Agora será preenchido pelo input
         email: '',
         document: '',
         password: '',
         userType: 'DRIVER'
     });
 
-    // Estado para Dados do Veículo (Vehicle Entity)
+    // Estado para Dados do Veículo
     const [vehicleData, setVehicleData] = useState({
         name: '',
         licensePlate: ''
@@ -26,35 +28,38 @@ const RegisterDriverModal = ({ onClose, onSuccess }) => {
     const handleCreateDriver = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         try {
-            // 1. Cria o Motorista (User)
+            // 1. Cria o Motorista
             await register(driverData);
 
-            // 2. Recupera o ID do motorista recém criado
-            // (Isso é necessário se o endpoint register não retornar o ID diretamente)
+            // 2. Recupera o ID (Busca pelo username único)
             const usersResponse = await api.get('/users');
             const newUser = usersResponse.data.find(u => u.username === driverData.username);
 
             if (newUser) {
                 setCreatedDriverId(newUser.id);
-                setStep(2); // Avança para cadastro do veículo
+                setStep(2); // Vai para a tela do veículo
             } else {
-                setError('Motorista criado, mas houve erro ao recuperar o ID.');
+                // Fallback: se não achar na lista, tenta logar ou avisa
+                setError('Motorista criado, mas não foi possível vincular o veículo automaticamente. Tente novamente.');
             }
 
         } catch (err) {
             console.error(err);
-            setError('Erro ao criar motorista. Email ou Documento já podem estar em uso.');
+            setError('Erro ao criar motorista. Verifique se o usuário, email ou CPF já existem.');
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleCreateVehicle = async (e) => {
         e.preventDefault();
         setError('');
+        setLoading(true);
 
         try {
-            // 3. Cria o Veículo vinculado ao Motorista
             await createVehicle({
                 name: vehicleData.name,
                 licensePlate: vehicleData.licensePlate,
@@ -62,11 +67,13 @@ const RegisterDriverModal = ({ onClose, onSuccess }) => {
             });
 
             alert('Motorista e Veículo cadastrados com sucesso!');
-            onSuccess(); // Atualiza a lista no Dashboard
-            onClose();   // Fecha a modal
+            onSuccess();
+            onClose();
         } catch (err) {
             console.error(err);
-            setError('Erro ao cadastrar veículo. A placa já pode estar cadastrada.');
+            setError('Erro ao cadastrar veículo. Verifique a placa.');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -78,13 +85,26 @@ const RegisterDriverModal = ({ onClose, onSuccess }) => {
                 {step === 1 ? (
                     <form onSubmit={handleCreateDriver}>
                         <h3>Novo Motorista (1/2)</h3>
-                        <p className="step-desc">Dados de Acesso</p>
+                        <p className="step-desc">Dados Pessoais e Acesso</p>
 
+                        {/* CAMPO NOVO: NOME COMPLETO */}
                         <div className="form-group">
-                            <label>Nome Completo / Usuário</label>
+                            <label>Nome Completo</label>
+                            <input
+                                value={driverData.fullname}
+                                onChange={e => setDriverData({...driverData, fullname: e.target.value})}
+                                placeholder="Ex: João da Silva"
+                                required
+                            />
+                        </div>
+
+                        {/* CAMPO SEPARADO: USUÁRIO */}
+                        <div className="form-group">
+                            <label>Usuário de Acesso (Login)</label>
                             <input
                                 value={driverData.username}
                                 onChange={e => setDriverData({...driverData, username: e.target.value})}
+                                placeholder="Ex: motorista_joao"
                                 required
                             />
                         </div>
@@ -100,17 +120,17 @@ const RegisterDriverModal = ({ onClose, onSuccess }) => {
                         </div>
 
                         <div className="form-group">
-                            <label>CPF (Documento)</label>
+                            <label>CPF (Apenas números)</label>
                             <input
                                 value={driverData.document}
                                 onChange={e => setDriverData({...driverData, document: e.target.value})}
-                                placeholder="Apenas números"
+                                placeholder="000.000.000-00"
                                 required
                             />
                         </div>
 
                         <div className="form-group">
-                            <label>Senha de Acesso</label>
+                            <label>Senha Provisória</label>
                             <input
                                 type="password"
                                 value={driverData.password}
@@ -120,12 +140,14 @@ const RegisterDriverModal = ({ onClose, onSuccess }) => {
                         </div>
 
                         {error && <p className="error-text">{error}</p>}
-                        <button type="submit" className="btn-primary">Próximo: Cadastrar Veículo</button>
+                        <button type="submit" className="btn-primary" disabled={loading}>
+                            {loading ? 'Processando...' : 'Próximo: Cadastrar Veículo'}
+                        </button>
                     </form>
                 ) : (
                     <form onSubmit={handleCreateVehicle}>
-                        <h3>Dados do Veículo (2/2)</h3>
-                        <p className="step-desc">Motorista: <strong>{driverData.username}</strong></p>
+                        <h3>Veículo (2/2)</h3>
+                        <p className="step-desc">Vinculado a: <strong>{driverData.fullname}</strong></p>
 
                         <div className="form-group">
                             <label>Modelo do Caminhão</label>
@@ -149,7 +171,9 @@ const RegisterDriverModal = ({ onClose, onSuccess }) => {
                         </div>
 
                         {error && <p className="error-text">{error}</p>}
-                        <button type="submit" className="btn-primary">Finalizar Cadastro</button>
+                        <button type="submit" className="btn-primary" disabled={loading}>
+                            {loading ? 'Salvando...' : 'Finalizar Cadastro'}
+                        </button>
                     </form>
                 )}
             </div>

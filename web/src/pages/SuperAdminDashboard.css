@@ -1,0 +1,294 @@
+:root {
+    --admin-bg: #f3f6f9;
+    --admin-card-bg: #ffffff;
+    --admin-primary: #6a1b9a; /* Roxo Profundo */
+    --admin-accent: #8e44ad;
+    --text-dark: #2c3e50;
+    --text-grey: #7f8c8d;
+}
+
+/* --- CORREÇÃO PRINCIPAL: CONTAINER GERAL --- */
+.super-dashboard {
+    /* Força o painel a ocupar a tela toda, ignorando restrições do #root */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+
+    background-color: var(--admin-bg);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-dark);
+    box-sizing: border-box;
+}
+
+/* --- HEADER SUPERIOR --- */
+.super-header {
+    background: var(--admin-card-bg);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.header-brand h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    background: linear-gradient(45deg, var(--admin-primary), var(--admin-accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+.header-brand .badge-super {
+    background: rgba(142, 68, 173, 0.1);
+    color: var(--admin-primary);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 10px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.header-profile {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.admin-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.btn-logout-ghost {
+    background: transparent;
+    border: 1px solid #e0e0e0;
+    padding: 8px 16px;
+    border-radius: 8px;
+    color: #e74c3c;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.btn-logout-ghost:hover {
+    background: #e74c3c;
+    color: white;
+    border-color: #e74c3c;
+}
+
+/* --- CONTEÚDO PRINCIPAL (LAYOUT FLUIDO) --- */
+.dashboard-content {
+    width: 100%;
+    max-width: 100%; /* Remove limites antigos */
+    margin: 0;
+    padding: 2rem 3rem; /* Espaçamento lateral confortável */
+    box-sizing: border-box;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* CARDS DE ESTATÍSTICA */
+.stats-container {
+    display: grid;
+    /* Grid responsivo: cria colunas que esticam */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--admin-card-bg);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.2s;
+    border-bottom: 4px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card.purple { border-bottom-color: var(--admin-accent); }
+.stat-card.blue { border-bottom-color: #3498db; }
+
+.icon-box {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+}
+
+.purple .icon-box { background: rgba(142, 68, 173, 0.1); color: var(--admin-accent); }
+.blue .icon-box { background: rgba(52, 152, 219, 0.1); color: #3498db; }
+
+.stat-details h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-grey);
+    font-weight: 500;
+}
+
+.stat-details .value {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-top: 5px;
+}
+
+/* FILTROS E AÇÕES */
+.actions-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.search-input-wrapper {
+    position: relative;
+    width: 300px;
+}
+
+.search-input-wrapper svg {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #bdc3c7;
+}
+
+.search-input-wrapper input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s;
+    background: white;
+}
+
+.search-input-wrapper input:focus {
+    border-color: var(--admin-accent);
+    box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.1);
+}
+
+.btn-new-company {
+    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+    transition: all 0.3s;
+}
+
+.btn-new-company:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(142, 68, 173, 0.4);
+}
+
+/* TABELA MODERNA - FULL WIDTH */
+.table-container {
+    background: var(--admin-card-bg);
+    border-radius: 16px;
+    padding: 5px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.03);
+    overflow: hidden;
+    width: 100%; /* Garante largura total */
+}
+
+table {
+    width: 100%; /* Estica a tabela */
+    border-collapse: collapse;
+}
+
+thead {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #edf2f7;
+}
+
+th {
+    text-align: left;
+    padding: 18px 25px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: var(--text-grey);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+tbody tr {
+    border-bottom: 1px solid #edf2f7;
+    transition: background 0.2s;
+}
+
+tbody tr:last-child {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background-color: #fcfaff;
+}
+
+td {
+    padding: 20px 25px;
+    color: var(--text-dark);
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+.company-name-cell {
+    font-weight: 600;
+    color: var(--admin-primary);
+}
+
+.badge-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.badge-status.active {
+    background-color: rgba(46, 204, 113, 0.15);
+    color: #27ae60;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 50px;
+    color: var(--text-grey);
+}

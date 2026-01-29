@@ -14,6 +14,8 @@ public record UserUpdateDTO(
 
         String email,
 
-        String document
+        String document,
+
+        String fullname
 ) {
 }

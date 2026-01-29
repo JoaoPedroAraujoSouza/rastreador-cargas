@@ -80,4 +80,14 @@ public class VehicleController {
         vehicleService.deleteVehicle(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/license-plate/{licensePlate}")
+    @Operation(summary = "Buscar veículo por placa", description = "Retorna os detalhes de um veículo específico pela placa")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Veículo encontrado"),
+            @ApiResponse(responseCode = "404", description = "Veículo não encontrado")
+    })
+    public ResponseEntity<List<VehicleResponseDTO>> getVehicleByLicensePlate(@PathVariable String licensePlate) {
+        return ResponseEntity.ok(vehicleService.getVehiclesByLicensePlate(licensePlate));
+    }
 }

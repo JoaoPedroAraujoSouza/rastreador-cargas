@@ -18,17 +18,24 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
 
     const login = async (username, password) => {
-        setLoading(true); // Opcional: Feedback visual durante o login
+        setLoading(true);
         try {
             const response = await apiLogin({ username, password });
 
+            // 1. Salva o Token
             localStorage.setItem('token', response.token);
-            localStorage.setItem('user', JSON.stringify({
-                username: response.username,
-                role: response.role
-            }));
 
-            setUser({ username: response.username, role: response.role });
+            // 2. CRÍTICO: Mapear os campos exatos que vêm do Backend (LoginResponseDTO)
+            // O Backend manda 'userType', não 'role'.
+            const userData = {
+                username: response.username,
+                userType: response.userType, // <--- CORREÇÃO AQUI
+                id: response.id
+            };
+
+            localStorage.setItem('user', JSON.stringify(userData));
+            setUser(userData);
+
             return true;
         } catch (error) {
             console.error("Erro no login:", error);
@@ -41,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     const registerAdmin = async (data) => {
         setLoading(true);
         try {
+            // Ajuste para garantir que o registro via contexto também siga o padrão
             const payload = { ...data, userType: 'ADMIN' };
             await apiRegister(payload);
             await login(data.username, data.password);
@@ -61,7 +69,6 @@ export const AuthProvider = ({ children }) => {
         </AuthContext.Provider>
     );
 };
-
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);

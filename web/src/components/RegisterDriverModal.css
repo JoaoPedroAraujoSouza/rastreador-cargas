@@ -1,43 +1,155 @@
+/* Fundo escuro semi-transparente */
 .modal-overlay {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: var(--overlay-dark);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Um pouco mais suave */
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 2000;
+    backdrop-filter: blur(3px); /* Desfoque no fundo */
 }
 
+/* O card do formulário */
 .modal-content {
-    background: var(--primary-dark);
-    padding: 2rem;
-    border-radius: 8px;
-    width: 400px;
-    color: var(--text-white);
+    background: #ffffff;
+    padding: 40px; /* Mais espaço interno */
+    border-radius: 16px; /* Bordas mais arredondadas */
+    width: 480px; /* Um pouco mais largo para respirar */
+    max-width: 90%;
     position: relative;
-    border: 1px solid var(--primary-blue);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2); /* Sombra mais suave e profunda */
+    animation: slideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); /* Animação mais fluida */
+    text-align: left; /* Garante alinhamento à esquerda */
 }
 
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    color: var(--text-white);
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Títulos e Descrições */
+.modal-content h3 {
+    margin: 0 0 10px 0;
+    color: #181c32;
     font-size: 1.5rem;
-    cursor: pointer;
-}
-
-.error-text {
-    color: var(--error-red);
-    font-size: 0.9rem;
-    margin-bottom: 10px;
 }
 
 .step-desc {
-    color: var(--text-medium-gray);
+    color: #7e8299;
+    margin-bottom: 30px;
+    font-size: 1rem;
+}
+
+/* Botão fechar (X) */
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f3f6f9;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #7e8299;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.close-btn:hover {
+    background: #e4e6ef;
+    color: #3699ff;
+}
+
+/* --- CORREÇÃO PRINCIPAL DOS CAMPOS --- */
+
+.form-group {
+    margin-bottom: 20px; /* Espaço entre os blocos */
+    width: 100%; /* Garante que o grupo ocupe tudo */
+}
+
+.form-group label {
+    display: block; /* Força o label a ficar numa linha sozinho */
+    margin-bottom: 8px; /* Espaço entre o label e o input */
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #3f4254; /* Cor de texto escura e nítida */
+}
+
+.form-group input {
+    width: 100%; /* A CORREÇÃO CHAVE: Força largura total */
+    padding: 12px 15px; /* Padding interno confortável */
+    border: 2px solid #e4e6ef; /* Borda sutil inicialmente */
+    border-radius: 10px; /* Arredondamento moderno */
+    font-size: 1rem;
+    color: #181c32;
+    background-color: #ffffff;
+    transition: all 0.3s ease; /* Transição suave para o foco */
+
+    /* ESSENCIAL: Garante que padding e borda não aumentem a largura total */
+    box-sizing: border-box;
+    outline: none; /* Remove o contorno padrão feio do navegador */
+}
+
+/* Estado de Foco (Quando clica no campo) */
+.form-group input:focus {
+    border-color: #3699ff; /* Cor primária azul ao focar */
+    box-shadow: 0 0 0 4px rgba(54, 153, 255, 0.1); /* Brilho sutil */
+}
+
+.form-group input::placeholder {
+    color: #b5b5c3; /* Cor do placeholder mais clara */
+}
+
+/* --- BOTÕES --- */
+
+.btn-primary {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 10px;
+    background-color: #8e44ad; /* Roxo padrão */
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Variação Verde para o botão de cadastro (sucesso) */
+.btn-primary.success {
+    background: linear-gradient(135deg, #1bc5bd 0%, #0bb7af 100%);
+    box-shadow: 0 4px 15px rgba(27, 197, 189, 0.2);
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(27, 197, 189, 0.3);
+}
+
+.btn-primary:disabled {
+    background: #e4e6ef;
+    color: #b5b5c3;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.error-text {
+    color: #f64e60;
     font-size: 0.9rem;
-    margin-bottom: 1rem;
-    text-align: center;
+    margin-bottom: 15px;
+    background: #ffe2e5;
+    padding: 10px;
+    border-radius: 8px;
 }
