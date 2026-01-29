@@ -1,4 +1,26 @@
 services:
+
+  app:
+    container_name: rastreador-backend
+    build: ./backend
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment:
+
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/rastreador_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_PROFILES_ACTIVE: dev
+
+      JWT_SECRET: ${JWT_SECRET:-5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437}
+      JWT_EXPIRATION: 86400000
+    depends_on:
+      - db
+    networks:
+      - rastreador-network
+
+  # Banco de Dados
   db:
     image: postgres:15-alpine
     container_name: rastreador-postgres
@@ -11,6 +33,9 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - rastreador-network
+
 
   pgadmin:
     image: dpage/pgadmin4
@@ -22,6 +47,12 @@ services:
       - "5050:80"
     depends_on:
       - db
+    networks:
+      - rastreador-network
 
 volumes:
   postgres_data:
+
+networks:
+  rastreador-network:
+    driver: bridge

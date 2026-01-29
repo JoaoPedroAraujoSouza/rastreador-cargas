@@ -15,7 +15,6 @@ public record UserCreateDTO(
         UserType userType,
 
         @NotBlank(message = "Este campo é obrigatório.")
-        //@Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres.")
         String password
 ) {
 }
