@@ -15,6 +15,12 @@ public record UserCreateDTO(
         UserType userType,
 
         @NotBlank(message = "Este campo é obrigatório.")
-        String password
+        String password,
+
+        @NotNull(message = "Este campo é obrigatório.")
+        String email,
+
+        @NotNull(message = "Este campo é obrigatório.")
+        String document
 ) {
 }

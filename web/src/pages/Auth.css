@@ -1,0 +1,234 @@
+/* Layout Dividido (Split Screen) */
+.auth-page {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--primary-dark);
+    overflow: hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif; /* Use fonte padrão do sistema se não tiver Inter */
+}
+
+/* --- LADO ESQUERDO: FORMULÁRIO --- */
+.auth-form-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background-color: var(--primary-dark); /* Fundo escuro */
+    position: relative;
+    z-index: 2;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: transparent; /* Removemos o card visível para um look mais clean */
+    padding: 0;
+    animation: slideIn 0.6s ease-out;
+}
+
+/* Cabeçalho do Form */
+.auth-header {
+    margin-bottom: 2.5rem;
+    text-align: left;
+}
+
+.auth-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-white);
+    margin-bottom: 1rem;
+}
+
+.auth-logo svg {
+    color: var(--primary-blue);
+    font-size: 1.8rem;
+}
+
+.auth-header h2 {
+    font-size: 2rem;
+    color: var(--text-white);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.auth-header p {
+    color: var(--text-medium-gray);
+    font-size: 1rem;
+}
+
+/* Inputs Modernos */
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-light-gray);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-left: 2px;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    color: var(--text-medium-gray);
+    pointer-events: none;
+    transition: color 0.3s;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 2.8rem; /* Espaço para o ícone */
+    border-radius: 8px;
+    border: 1px solid var(--primary-dark-lighter);
+    background-color: rgba(255, 255, 255, 0.03); /* Leve transparência */
+    color: var(--text-white);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15); /* Glow effect */
+}
+
+.form-group input:focus + .input-icon {
+    color: var(--primary-blue);
+}
+
+/* Botão Moderno */
+.btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+/* Footer do Form */
+.auth-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-medium-gray);
+}
+
+.auth-link {
+    color: var(--primary-blue);
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: 5px;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-link:hover {
+    color: #5dade2;
+    text-decoration: underline;
+}
+
+/* --- LADO DIREITO: BRANDING --- */
+.auth-brand-section {
+    flex: 1.2; /* Um pouco maior que o form */
+    background: linear-gradient(135deg, #1a252f 0%, #2c3e50 100%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    padding: 4rem;
+    overflow: hidden;
+}
+
+/* Padrão de fundo (efeito mapa abstrato) */
+.brand-bg-pattern {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: radial-gradient(rgba(52, 152, 219, 0.2) 1px, transparent 1px);
+    background-size: 40px 40px; /* Pontos do grid */
+    opacity: 0.5;
+}
+
+.brand-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 500px;
+}
+
+.brand-icon-large {
+    font-size: 8rem;
+    color: var(--primary-blue);
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 20px rgba(52, 152, 219, 0.4));
+    animation: float 6s ease-in-out infinite;
+}
+
+.brand-content h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.brand-content p {
+    font-size: 1.2rem;
+    color: var(--text-light-gray);
+    line-height: 1.6;
+}
+
+/* Responsividade */
+@media (max-width: 960px) {
+    .auth-brand-section {
+        display: none; /* Esconde o lado direito em tablets/celulares */
+    }
+    .auth-form-section {
+        padding: 1.5rem;
+    }
+}
+
+/* Animações */
+@keyframes slideIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}

@@ -30,22 +30,18 @@ public class AuthService {
                 .orElseThrow(() -> new BadCredentialsException("Usuário ou senha inválidos"));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            log.warn("Senha incorreta para: {}", request.username());
             throw new BadCredentialsException("Usuário ou senha inválidos");
         }
 
         String token = jwtUtil.generateToken(user.getUsername());
 
-        log.info("Login bem-sucedido para: {}", request.username());
-
-        return new LoginResponseDTO(token, user.getUsername(), user.getUserType());
+        return new LoginResponseDTO(token, user.getUsername(), user.getUserType(), user.getId());
     }
-    
+
     public LoginResponseDTO register(UserCreateDTO request) {
-        log.info("Tentativa de registro: {}", request.username());
+        log.info("Registrando novo usuário: {}", request.username());
 
         if (userRepository.findByUsername(request.username()).isPresent()) {
-            log.warn("Nome de usuário já existe: {}", request.username());
             throw new IllegalArgumentException("Nome de usuário já existe");
         }
 
@@ -53,13 +49,14 @@ public class AuthService {
         newUser.setUsername(request.username());
         newUser.setPassword(passwordEncoder.encode(request.password()));
         newUser.setUserType(request.userType());
+        newUser.setEmail(request.email());
+        newUser.setDocument(request.document());
+
 
         userRepository.save(newUser);
 
         String token = jwtUtil.generateToken(newUser.getUsername());
 
-        log.info("Registro bem-sucedido para: {}", request.username());
-
-        return new LoginResponseDTO(token, newUser.getUsername(), newUser.getUserType());
+        return new LoginResponseDTO(token, newUser.getUsername(), newUser.getUserType(), newUser.getId());
     }
 }

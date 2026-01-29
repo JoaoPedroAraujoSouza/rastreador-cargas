@@ -81,5 +81,10 @@ public class UserService {
         return UserResponseDTO.fromEntity(updatedUser);
     }
 
+    public UserResponseDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado com email: " + email));
+        return UserResponseDTO.fromEntity(user);
+    }
 
 }

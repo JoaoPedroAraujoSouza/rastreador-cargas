@@ -1,9 +1,11 @@
 -- Tabela de Usuários
 CREATE TABLE users (
                        id BIGSERIAL PRIMARY KEY,
-                       username VARCHAR(255) NOT NULL UNIQUE,
+                       username VARCHAR(255) NOT NULL,
                        password VARCHAR(255) NOT NULL,
-                       user_type VARCHAR(50) NOT NULL
+                       user_type VARCHAR(50) NOT NULL,
+                       email VARCHAR(255) NOT NULL UNIQUE,
+                       document VARCHAR(20) NOT NULL UNIQUE
 );
 
 -- Tabela de Veículos
@@ -27,3 +29,9 @@ CREATE TABLE localization (
 
 -- Índices de Performance
 CREATE INDEX idx_localization_timestamp ON localization (timestamp);
+
+INSERT INTO users (username, password, user_type, email, document)
+VALUES ('motorista1', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'DRIVER', 'jose@teste.com', '123.456.789-00');
+
+INSERT INTO users (username, password, user_type, email, document)
+VALUES ('transportadora', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy', 'ADMIN', 'log@teste.com', '00.123.456/0001-99');

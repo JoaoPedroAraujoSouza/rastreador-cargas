@@ -6,9 +6,10 @@ public record LoginResponseDTO (
     String token,
     String type,
     String username,
-    UserType userType
+    UserType userType,
+    Long id
     ) {
-        public LoginResponseDTO(String token, String username, UserType userType) {
-            this(token, "Bearer", username, userType);
+        public LoginResponseDTO(String token, String username, UserType userType, Long id) {
+            this(token, "Bearer", username, userType, id);
         }
     }

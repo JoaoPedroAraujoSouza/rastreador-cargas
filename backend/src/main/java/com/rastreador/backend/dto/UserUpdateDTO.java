@@ -10,6 +10,10 @@ public record UserUpdateDTO(
 
         UserType userType,
 
-        String password
+        String password,
+
+        String email,
+
+        String document
 ) {
 }
