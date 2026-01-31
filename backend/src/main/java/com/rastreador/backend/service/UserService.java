@@ -46,11 +46,11 @@ public class UserService {
         List<User> users;
 
         if (currentUser.getUserType() == UserType.SUPER_ADMIN) {
-            // Super Admin vê todos os MOTORISTAS (pode mudar para findAll se quiser ver Admins também)
-            users = userRepository.findByUserType(UserType.DRIVER);
+
+            users = userRepository.findByUserType(UserType.ADMIN);
         }
         else if (currentUser.getUserType() == UserType.ADMIN) {
-            // Transportadora vê APENAS seus subordinados
+
             users = userRepository.findByManager(currentUser);
         }
         else {

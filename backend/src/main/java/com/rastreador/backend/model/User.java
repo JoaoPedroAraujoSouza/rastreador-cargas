@@ -5,6 +5,9 @@ import com.rastreador.backend.enums.UserType;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
 
 @Data
 @Entity
@@ -19,7 +22,7 @@ public class User {
     private String username;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "user_type",nullable = false)
     private UserType userType;
 
     @Column(nullable = false)

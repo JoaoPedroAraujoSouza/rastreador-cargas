@@ -4,8 +4,9 @@ import Sidebar from '../components/sidebar/Sidebar';
 import Mapa from '../components/Mapa';
 import RegisterDriverModal from '../components/RegisterDriverModal';
 import WebSocketService from '../services/WebSocketService';
-import { getUsers, getLocalizacaoHistorico } from '../services/api'; // Atualizado import
+import { getUsers, getLocalizacaoHistorico } from '../services/api';
 import { USE_MOCK, getMotoristaMock, getLocalizacaoHistoricoMock } from '../services/mockData';
+import '../App.css'; // Garante que estilos globais sejam carregados
 
 const TransportadoraDashboard = () => {
     const { user, logout } = useAuth();
@@ -14,6 +15,7 @@ const TransportadoraDashboard = () => {
     const [motoristas, setMotoristas] = useState([]);
     const [motoristaSelecionado, setMotoristaSelecionado] = useState(null);
     const [localizacao, setLocalizacao] = useState(null);
+    const [historicoRota, setHistoricoRota] = useState([]); // NOVO: Guarda a rota completa
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -23,13 +25,14 @@ const TransportadoraDashboard = () => {
 
     const subscriptionRef = useRef(null);
 
+    // 1. Carrega lista de motoristas
     const fetchMotoristas = async () => {
         try {
             setLoading(true);
-            // Busca geral de usuários, filtra no front apenas os DRIVERS desta transportadora
-            // (Idealmente o backend 'listUsersByContext' já filtra, como fizemos no UserService)
             const data = USE_MOCK ? await getMotoristaMock() : await getUsers();
-            setMotoristas(data);
+            // Se a API retornar todos, filtra apenas os drivers (se o backend já não filtrar)
+            const driversOnly = data.filter(u => u.userType === 'DRIVER');
+            setMotoristas(driversOnly.length > 0 ? driversOnly : data);
         } catch (err) {
             console.error(err);
             setError('Erro ao carregar frota.');
@@ -38,6 +41,7 @@ const TransportadoraDashboard = () => {
         }
     };
 
+    // 2. Conecta WebSocket
     useEffect(() => {
         fetchMotoristas();
         if (!USE_MOCK) {
@@ -47,28 +51,46 @@ const TransportadoraDashboard = () => {
         return () => { if(!USE_MOCK) WebSocketService.disconnect(); }
     }, []);
 
+    // 3. Carrega Histórico ao selecionar motorista
     useEffect(() => {
         if (!motoristaSelecionado) return;
+
         const loadHistory = async () => {
             try {
                 const apiFunc = USE_MOCK ? getLocalizacaoHistoricoMock : getLocalizacaoHistorico;
                 const hist = await apiFunc(motoristaSelecionado.id);
+
                 if (hist && hist.length > 0) {
-                    const loc = hist[0];
+                    // O backend retorna DESC (Mais novo -> Mais antigo).
+                    // Para o Replay, precisamos ASC (Antigo -> Novo).
+                    const rotaCronologica = [...hist].reverse();
+                    setHistoricoRota(rotaCronologica);
+
+                    // Posição inicial = Última conhecida (fim da lista cronológica)
+                    const ultima = rotaCronologica[rotaCronologica.length - 1];
                     setLocalizacao({
-                        latitude: loc.latitude,
-                        longitude: loc.longitude,
-                        dataHora: loc.timestamp || loc.dataHora
+                        latitude: ultima.latitude,
+                        longitude: ultima.longitude,
+                        dataHora: ultima.timestamp || ultima.dataHora
                     });
+                } else {
+                    setHistoricoRota([]);
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {
+                console.error(e);
+                setHistoricoRota([]);
+            }
         };
         loadHistory();
 
+        // Assina atualizações em tempo real
         if (!USE_MOCK && isWsConnected) {
             if (subscriptionRef.current) subscriptionRef.current.unsubscribe();
             subscriptionRef.current = WebSocketService.subscribeToDriver(motoristaSelecionado.id, (data) => {
+                // Atualiza posição atual
                 setLocalizacao({ latitude: data.latitude, longitude: data.longitude, dataHora: data.timestamp });
+                // Adiciona ao histórico em tempo real
+                setHistoricoRota(prev => [...prev, { latitude: data.latitude, longitude: data.longitude, timestamp: data.timestamp }]);
             });
         }
         return () => { if (subscriptionRef.current) subscriptionRef.current.unsubscribe(); };
@@ -81,6 +103,7 @@ const TransportadoraDashboard = () => {
                 onSelectMotorista={setMotoristaSelecionado}
                 motoristaSelecionado={motoristaSelecionado}
             />
+
             <div className="dashboard-header">
                 <div className="user-badge">
                     <strong>{user?.username}</strong>
@@ -97,6 +120,8 @@ const TransportadoraDashboard = () => {
                 <Mapa
                     latitude={localizacao?.latitude}
                     longitude={localizacao?.longitude}
+                    // Passamos o histórico completo para o componente Mapa
+                    historico={historicoRota}
                     nomeMotorista={motoristaSelecionado?.fullname || motoristaSelecionado?.username || "Selecione um motorista"}
                     dataHora={localizacao?.dataHora}
                 />

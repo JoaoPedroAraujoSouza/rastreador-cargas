@@ -192,12 +192,20 @@
     font-size: 0.95rem;
     outline: none;
     transition: all 0.3s;
-    background: white;
+
+    background-color: #ffffff;
+    color: #2c3e50;
+}
+
+.search-input-wrapper input::placeholder {
+    color: #95a5a6;
+    opacity: 1;
 }
 
 .search-input-wrapper input:focus {
     border-color: var(--admin-accent);
     box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.1);
+    background-color: #ffffff;
 }
 
 .btn-new-company {

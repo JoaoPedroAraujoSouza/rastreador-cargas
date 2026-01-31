@@ -82,3 +82,31 @@
 .btn-red {
   background: linear-gradient(135deg, #f64e60 0%, #ee2d41 100%);
 }
+
+.app {
+  display: flex; /* Coloca Sidebar e Mapa lado a lado */
+  height: 100vh; /* Ocupa 100% da altura da tela */
+  width: 100vw; /* Ocupa 100% da largura */
+  overflow: hidden;
+}
+
+.mapa-container {
+  flex: 1;
+  position: relative;  /* Necessário para posicionar botões flutuantes dentro dele */
+  height: 100%;        /* Garante altura total */
+  background-color: #e4e6ef; /* Cor de fundo caso o mapa demore a carregar */
+  z-index: 1;
+}
+
+.loading-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  z-index: 2000;
+  font-weight: bold;
+}

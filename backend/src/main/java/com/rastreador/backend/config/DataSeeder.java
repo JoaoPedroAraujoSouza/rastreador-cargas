@@ -1,8 +1,10 @@
 package com.rastreador.backend.config;
 
 import com.rastreador.backend.enums.UserType;
+import com.rastreador.backend.model.Localization;
 import com.rastreador.backend.model.User;
 import com.rastreador.backend.model.Vehicle;
+import com.rastreador.backend.repository.LocalizationRepository;
 import com.rastreador.backend.repository.UserRepository;
 import com.rastreador.backend.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Component
@@ -18,7 +21,8 @@ import java.util.Optional;
 public class DataSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
-    private final VehicleRepository vehicleRepository; // Se não tiver repositório de veículo, crie ou ignore esta parte
+    private final VehicleRepository vehicleRepository;
+    private final LocalizationRepository localizationRepository; // Repositório de Localização adicionado
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -26,7 +30,7 @@ public class DataSeeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         System.out.println("--- 🚀 INICIANDO SEED DE DADOS ---");
 
-        // 1. Criar Super Admin
+        // 1. Criar Super Admins
         User superAdmin1 = createUserIfNotFound("kelven_admin", "Kélven Alves", "kelven@fleet.com", "000.000.000-01", UserType.SUPER_ADMIN, null);
         User superAdmin2 = createUserIfNotFound("joao_admin", "João Pedro", "joao@fleet.com", "000.000.000-02", UserType.SUPER_ADMIN, null);
 
@@ -40,6 +44,9 @@ public class DataSeeder implements CommandLineRunner {
             // 4. Criar Veículo para o Motorista
             if (motorista != null) {
                 createVehicleIfNotFound("Scania R450", "ABC-1234", motorista);
+
+                // 5. Criar Rota de Teste (Localizações) [NOVO]
+                createRouteIfEmpty(motorista);
             }
         }
 
@@ -59,15 +66,12 @@ public class DataSeeder implements CommandLineRunner {
         user.setDocument(doc);
         user.setUserType(type);
         user.setManager(manager);
-        // AQUI ESTÁ O SEGREDO: O Java gera o hash compatível agora
         user.setPassword(passwordEncoder.encode("password"));
 
         return userRepository.save(user);
     }
 
     private void createVehicleIfNotFound(String name, String plate, User owner) {
-        // Simples verificação para não duplicar (você precisará ter o VehicleRepository)
-        // Se não tiver o repositório pronto, pode comentar este método.
         if (vehicleRepository.findByLicensePlate(plate).isEmpty()) {
             Vehicle v = new Vehicle();
             v.setName(name);
@@ -75,5 +79,43 @@ public class DataSeeder implements CommandLineRunner {
             v.setOwner(owner);
             vehicleRepository.save(v);
         }
+    }
+
+    // --- Lógica para criar localizações fictícias ---
+    private void createRouteIfEmpty(User user) {
+        // Verifica se já existem dados para não duplicar a cada restart
+        // (Nota: Se você rodar 'docker-compose down -v', ele cria de novo pois apaga o banco)
+        if (localizationRepository.count() > 0) {
+            return;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Rota simulada: Centro de SP -> Ibirapuera
+        // Ponto 1: Praça da Sé (Há 60 min)
+        createLocation(-23.550520, -46.633308, now.minusMinutes(60), user);
+
+        // Ponto 2: Av. 23 de Maio (Há 45 min)
+        createLocation(-23.559669, -46.639395, now.minusMinutes(45), user);
+
+        // Ponto 3: Paraíso (Há 30 min)
+        createLocation(-23.572370, -46.643323, now.minusMinutes(30), user);
+
+        // Ponto 4: Parque Ibirapuera (Há 15 min)
+        createLocation(-23.587416, -46.657634, now.minusMinutes(15), user);
+
+        // Ponto 5: Fim da Rota (Agora)
+        createLocation(-23.591245, -46.661957, now, user);
+
+        System.out.println("📍 Rota de teste criada para: " + user.getUsername());
+    }
+
+    private void createLocation(Double lat, Double lon, LocalDateTime time, User user) {
+        Localization loc = new Localization();
+        loc.setLatitude(lat);
+        loc.setLongitude(lon);
+        loc.setTimestamp(time);
+        loc.setUser(user);
+        localizationRepository.save(loc);
     }
 }

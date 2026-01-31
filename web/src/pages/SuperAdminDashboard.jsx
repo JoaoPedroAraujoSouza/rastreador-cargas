@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getUsers } from '../services/api';
 import RegisterCompanyModal from '../components/RegisterCompanyModal';
-import { FaBuilding, FaPlus, FaUsers, FaSearch, FaSignOutAlt, FaNetworkWired } from 'react-icons/fa';
+import { FaBuilding, FaPlus, FaSearch, FaSignOutAlt, FaNetworkWired } from 'react-icons/fa';
 import './SuperAdminDashboard.css';
 
 const SuperAdminDashboard = () => {
@@ -15,11 +15,19 @@ const SuperAdminDashboard = () => {
     const fetchCompanies = async () => {
         try {
             setLoading(true);
-            const allUsers = await getUsers();
-            // Filtra apenas ADMIN (Transportadoras)
-            // No futuro, isso pode ser um endpoint específico do backend
-            const admins = allUsers.filter(u => u.userType === 'ADMIN');
-            setCompanies(admins);
+
+            // O Backend agora retorna EXATAMENTE o que precisamos (apenas ADMINs)
+            // graças ao método listUsersByContext no UserController
+            const data = await getUsers();
+
+            console.log("Transportadoras carregadas:", data);
+
+            // Verificação de segurança: Se vier vazio, loga para ajudar no debug
+            if (data.length === 0) {
+                console.warn("Nenhuma transportadora retornada pela API. Verifique se o DataSeeder rodou.");
+            }
+
+            setCompanies(data);
         } catch (error) {
             console.error("Erro ao buscar empresas:", error);
         } finally {
@@ -31,7 +39,7 @@ const SuperAdminDashboard = () => {
         fetchCompanies();
     }, []);
 
-    // Filtro local por nome ou documento
+    // Filtro local apenas para a barra de pesquisa (Nome ou CNPJ)
     const filteredCompanies = companies.filter(c =>
         (c.fullname && c.fullname.toLowerCase().includes(busca.toLowerCase())) ||
         (c.document && c.document.includes(busca))
@@ -39,7 +47,6 @@ const SuperAdminDashboard = () => {
 
     return (
         <div className="super-dashboard">
-            {/* Header Fixo */}
             <header className="super-header">
                 <div className="header-brand">
                     <h1>Rastreador Pro <span className="badge-super">Super Admin</span></h1>
@@ -53,7 +60,6 @@ const SuperAdminDashboard = () => {
             </header>
 
             <main className="dashboard-content">
-                {/* Cards de Métricas */}
                 <div className="stats-container">
                     <div className="stat-card purple">
                         <div className="icon-box"><FaBuilding /></div>
@@ -71,7 +77,6 @@ const SuperAdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Barra de Ações */}
                 <div className="actions-row">
                     <div className="search-input-wrapper">
                         <FaSearch />
@@ -87,7 +92,6 @@ const SuperAdminDashboard = () => {
                     </button>
                 </div>
 
-                {/* Tabela de Dados */}
                 <div className="table-container">
                     {loading ? (
                         <div className="empty-state">Carregando dados do sistema...</div>
@@ -106,7 +110,7 @@ const SuperAdminDashboard = () => {
                             {filteredCompanies.length > 0 ? (
                                 filteredCompanies.map(company => (
                                     <tr key={company.id}>
-                                        <td className="company-name-cell">{company.fullname}</td>
+                                        <td className="company-name-cell">{company.fullname || "Sem Nome"}</td>
                                         <td>{company.username}</td>
                                         <td>{company.document}</td>
                                         <td>{company.email}</td>
@@ -118,7 +122,9 @@ const SuperAdminDashboard = () => {
                             ) : (
                                 <tr>
                                     <td colSpan="5" className="empty-state">
-                                        {busca ? "Nenhuma empresa encontrada com este termo." : "Nenhuma transportadora cadastrada."}
+                                        {companies.length === 0
+                                            ? "Nenhuma transportadora encontrada no sistema."
+                                            : "Nenhum resultado para a busca."}
                                     </td>
                                 </tr>
                             )}
@@ -128,7 +134,6 @@ const SuperAdminDashboard = () => {
                 </div>
             </main>
 
-            {/* Modal de Cadastro */}
             {showModal && (
                 <RegisterCompanyModal
                     onClose={() => setShowModal(false)}

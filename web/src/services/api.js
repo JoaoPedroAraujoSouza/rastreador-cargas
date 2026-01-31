@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: 'http://localhost:8080/api', // Ajuste a porta se necessário
 });
 
+// Interceptor para adicionar o Token automaticamente
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -27,15 +28,21 @@ export const createVehicle = async (vehicleData) => {
   return response.data;
 };
 
-// Busca genérica de usuários
+export const getMotoristas = async () => {
+  const response = await api.get('/users');
+  return response.data;
+};
+
 export const getUsers = async () => {
   const response = await api.get('/users');
   return response.data;
 };
 
+// --- ATUALIZADO PARA REPLAY ---
 export const getLocalizacaoHistorico = async (userId) => {
   try {
-    const response = await api.get(`/localizations/user/${userId}`);
+    // Adicionado ?size=100 para pegar mais pontos para o replay
+    const response = await api.get(`/localizations/user/${userId}?size=100`);
     return response.data.content || [];
   } catch (error) {
     console.error("Erro ao buscar histórico", error);
