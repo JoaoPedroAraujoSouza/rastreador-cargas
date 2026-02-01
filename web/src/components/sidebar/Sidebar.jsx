@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
-import { FaSearch, FaTruck } from 'react-icons/fa';
+import { useState } from 'react';
+import { FaSearch, FaTruck, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import './Sidebar.css';
 
-const Sidebar = ({ motoristas = [], onSelectMotorista, motoristaSelecionado }) => {
+const Sidebar = ({
+                     motoristas = [],
+                     onSelectMotorista,
+                     motoristaSelecionado,
+                     page = 0,
+                     totalPages = 1,
+                     onPageChange
+                 }) => {
     const [busca, setBusca] = useState('');
-
-    // --- DEBUG: Mostra no console o formato real do primeiro motorista ---
-    useEffect(() => {
-        if (motoristas.length > 0) {
-            console.log("ESTRUTURA DO MOTORISTA (Verifique as chaves):", motoristas[0]);
-        }
-    }, [motoristas]);
-    // -------------------------------------------------------------------
 
     const normalizarTexto = (texto) => {
         if (!texto) return '';
@@ -21,7 +20,6 @@ const Sidebar = ({ motoristas = [], onSelectMotorista, motoristaSelecionado }) =
     const termoBusca = normalizarTexto(busca);
 
     const motoristasFiltrados = motoristas.filter((motorista) => {
-        // Tenta ler o nome de várias propriedades possíveis
         const nomeReal = normalizarTexto(
             motorista.fullname || motorista.fullName || motorista.nome || motorista.username
         );
@@ -38,12 +36,12 @@ const Sidebar = ({ motoristas = [], onSelectMotorista, motoristaSelecionado }) =
     return (
         <div className="sidebar">
             <div className="sidebar-header">
-                <h2>Minha Frota <span className="badge-count">{motoristasFiltrados.length}</span></h2>
+                <h2>Minha Frota <span className="badge-count">{motoristas.length}</span></h2>
                 <div className="search-box">
                     <FaSearch className="search-icon" />
                     <input
                         type="text"
-                        placeholder="Buscar..."
+                        placeholder="Buscar nesta página..."
                         value={busca}
                         onChange={(e) => setBusca(e.target.value)}
                     />
@@ -53,11 +51,10 @@ const Sidebar = ({ motoristas = [], onSelectMotorista, motoristaSelecionado }) =
             <div className="motoristas-lista">
                 {motoristasFiltrados.length === 0 ? (
                     <div className="sem-resultados">
-                        <p>{busca ? `Sem resultados para "${busca}"` : "Nenhum motorista na lista."}</p>
+                        <p>{busca ? `Sem resultados para "${busca}"` : "Nenhum motorista nesta página."}</p>
                     </div>
                 ) : (
                     motoristasFiltrados.map((motorista) => {
-                        // Lógica de exibição robusta
                         const nomeExibicao = motorista.fullname || motorista.fullName || motorista.nome || motorista.username || "Sem Nome";
                         const subTitulo = motorista.username ? `@${motorista.username}` : (motorista.document || "S/ Doc");
 
@@ -77,6 +74,31 @@ const Sidebar = ({ motoristas = [], onSelectMotorista, motoristaSelecionado }) =
                         );
                     })
                 )}
+            </div>
+
+            {/* REMOVIDA A CONDIÇÃO {totalPages > 1 && ...} PARA APARECER SEMPRE */}
+            <div className="sidebar-footer">
+                <button
+                    className="pagination-btn"
+                    disabled={page === 0}
+                    onClick={() => onPageChange && onPageChange(page - 1)}
+                    title="Página Anterior"
+                >
+                    <FaChevronLeft />
+                </button>
+
+                <span className="pagination-info">
+                    {page + 1} / {totalPages || 1}
+                </span>
+
+                <button
+                    className="pagination-btn"
+                    disabled={page >= (totalPages - 1)}
+                    onClick={() => onPageChange && onPageChange(page + 1)}
+                    title="Próxima Página"
+                >
+                    <FaChevronRight />
+                </button>
             </div>
         </div>
     );

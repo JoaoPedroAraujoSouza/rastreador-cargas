@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.rastreador.backend.enums.UserType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.rastreador.backend.model.User;
@@ -14,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
 
-    List<User> findByManager(User manager);
+    Page<User> findByManager(User manager, Pageable pageable);
 
-    List<User> findByUserType(UserType userType);
+    Page<User> findByUserType(UserType userType, Pageable pageable);
 }

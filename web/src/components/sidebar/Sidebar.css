@@ -150,3 +150,53 @@
   margin-top: 30px;
   font-size: 14px;
 }
+
+.sidebar-footer {
+  padding: 15px;
+  background-color: #1b1b28;
+  border-top: 1px solid #2d2d3f;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.pagination-btn {
+  background-color: #2b2b40;
+  border: 1px solid #3b3b52;
+  color: #ffffff; /* Garante que o texto/ícone seja branco */
+  width: 35px;
+  height: 35px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn svg {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: #3699ff;
+  border-color: #3699ff;
+  color: white;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-color: transparent;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: #a2a3b7;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}

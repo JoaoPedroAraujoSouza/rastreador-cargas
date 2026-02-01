@@ -33,8 +33,8 @@ export const getMotoristas = async () => {
   return response.data;
 };
 
-export const getUsers = async () => {
-  const response = await api.get('/users');
+export const getUsers = async (page = 0, size = 10) => {
+  const response = await api.get(`/users?page=${page}&size=${size}`);
   return response.data;
 };
 

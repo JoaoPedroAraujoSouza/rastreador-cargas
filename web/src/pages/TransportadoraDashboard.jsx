@@ -6,7 +6,8 @@ import RegisterDriverModal from '../components/RegisterDriverModal';
 import WebSocketService from '../services/WebSocketService';
 import { getUsers, getLocalizacaoHistorico } from '../services/api';
 import { USE_MOCK, getMotoristaMock, getLocalizacaoHistoricoMock } from '../services/mockData';
-import '../App.css'; // Garante que estilos globais sejam carregados
+import { FaPlus, FaSignOutAlt, FaUserTie } from 'react-icons/fa';
+import '../App.css';
 
 const TransportadoraDashboard = () => {
     const { user, logout } = useAuth();
@@ -15,24 +16,51 @@ const TransportadoraDashboard = () => {
     const [motoristas, setMotoristas] = useState([]);
     const [motoristaSelecionado, setMotoristaSelecionado] = useState(null);
     const [localizacao, setLocalizacao] = useState(null);
-    const [historicoRota, setHistoricoRota] = useState([]); // NOVO: Guarda a rota completa
+    const [historicoRota, setHistoricoRota] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [setError] = useState(null);
+
+    // Estados de Paginação
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
+    const PAGE_SIZE = 10;
 
     // Estados de Controle
     const [isWsConnected, setIsWsConnected] = useState(false);
     const [showDriverModal, setShowDriverModal] = useState(false);
 
+    // Referência para a inscrição do WebSocket (Aqui está a variável que deu erro)
     const subscriptionRef = useRef(null);
 
-    // 1. Carrega lista de motoristas
-    const fetchMotoristas = async () => {
+    // 1. Carrega lista de motoristas (Com Paginação)
+    const fetchMotoristas = async (currentPage = 0) => {
         try {
             setLoading(true);
-            const data = USE_MOCK ? await getMotoristaMock() : await getUsers();
-            // Se a API retornar todos, filtra apenas os drivers (se o backend já não filtrar)
-            const driversOnly = data.filter(u => u.userType === 'DRIVER');
-            setMotoristas(driversOnly.length > 0 ? driversOnly : data);
+
+            let data;
+            let content = [];
+            let total = 0;
+
+            if (USE_MOCK) {
+                data = await getMotoristaMock();
+                content = data;
+                total = 1;
+            } else {
+                // API Real: Passamos page e size
+                data = await getUsers(currentPage, PAGE_SIZE);
+                // Ajuste para ler o formato Page do Spring Boot
+                content = data.content || [];
+                total = data.totalPages;
+            }
+
+            const driversOnly = Array.isArray(content)
+                ? content.filter(u => u.userType === 'DRIVER')
+                : [];
+
+            setMotoristas(driversOnly);
+            setTotalPages(total);
+            setPage(currentPage);
+
         } catch (err) {
             console.error(err);
             setError('Erro ao carregar frota.');
@@ -41,32 +69,42 @@ const TransportadoraDashboard = () => {
         }
     };
 
-    // 2. Conecta WebSocket
+    // Função passada para a Sidebar controlar a página
+    const handlePageChange = (newPage) => {
+        if (newPage >= 0 && newPage < totalPages) {
+            fetchMotoristas(newPage);
+        }
+    };
+
+    // 2. Conecta WebSocket e Carrega Inicial
     useEffect(() => {
-        fetchMotoristas();
+        fetchMotoristas(0); // Carrega página 0
+
         if (!USE_MOCK) {
             const token = localStorage.getItem('token');
-            WebSocketService.connect(token, () => setIsWsConnected(true), (err) => console.error("Erro WS:", err));
+            WebSocketService.connect(
+                token,
+                () => setIsWsConnected(true),
+                (err) => console.error("Erro WS:", err)
+            );
         }
         return () => { if(!USE_MOCK) WebSocketService.disconnect(); }
     }, []);
 
-    // 3. Carrega Histórico ao selecionar motorista
+    // 3. Carrega Histórico e Assina WebSocket ao selecionar motorista
     useEffect(() => {
         if (!motoristaSelecionado) return;
 
+        // A. Carrega Histórico (Replay)
         const loadHistory = async () => {
             try {
                 const apiFunc = USE_MOCK ? getLocalizacaoHistoricoMock : getLocalizacaoHistorico;
                 const hist = await apiFunc(motoristaSelecionado.id);
 
                 if (hist && hist.length > 0) {
-                    // O backend retorna DESC (Mais novo -> Mais antigo).
-                    // Para o Replay, precisamos ASC (Antigo -> Novo).
                     const rotaCronologica = [...hist].reverse();
                     setHistoricoRota(rotaCronologica);
 
-                    // Posição inicial = Última conhecida (fim da lista cronológica)
                     const ultima = rotaCronologica[rotaCronologica.length - 1];
                     setLocalizacao({
                         latitude: ultima.latitude,
@@ -83,17 +121,34 @@ const TransportadoraDashboard = () => {
         };
         loadHistory();
 
-        // Assina atualizações em tempo real
+        // B. Assina WebSocket em tempo real (USO DO subscriptionRef)
         if (!USE_MOCK && isWsConnected) {
-            if (subscriptionRef.current) subscriptionRef.current.unsubscribe();
+            // Se já existe uma inscrição anterior, cancela ela
+            if (subscriptionRef.current) {
+                subscriptionRef.current.unsubscribe();
+            }
+
+            // Cria nova inscrição para o motorista selecionado
             subscriptionRef.current = WebSocketService.subscribeToDriver(motoristaSelecionado.id, (data) => {
-                // Atualiza posição atual
-                setLocalizacao({ latitude: data.latitude, longitude: data.longitude, dataHora: data.timestamp });
-                // Adiciona ao histórico em tempo real
-                setHistoricoRota(prev => [...prev, { latitude: data.latitude, longitude: data.longitude, timestamp: data.timestamp }]);
+                setLocalizacao({
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                    dataHora: data.timestamp
+                });
+                setHistoricoRota(prev => [...prev, {
+                    latitude: data.latitude,
+                    longitude: data.longitude,
+                    timestamp: data.timestamp
+                }]);
             });
         }
-        return () => { if (subscriptionRef.current) subscriptionRef.current.unsubscribe(); };
+
+        // Cleanup: Cancela inscrição ao desmontar ou trocar de motorista
+        return () => {
+            if (subscriptionRef.current) {
+                subscriptionRef.current.unsubscribe();
+            }
+        };
     }, [motoristaSelecionado, isWsConnected]);
 
     return (
@@ -102,17 +157,29 @@ const TransportadoraDashboard = () => {
                 motoristas={motoristas}
                 onSelectMotorista={setMotoristaSelecionado}
                 motoristaSelecionado={motoristaSelecionado}
+                // Props de Paginação
+                page={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
             />
 
             <div className="dashboard-header">
                 <div className="user-badge">
-                    <strong>{user?.username}</strong>
-                    <span>TRANSPORTADORA</span>
+                    <div className="avatar-circle">
+                        <FaUserTie />
+                    </div>
+                    <div className="user-info">
+                        <strong>{user?.username}</strong>
+                        <span>TRANSPORTADORA</span>
+                    </div>
                 </div>
+
                 <button className="btn-modern btn-green" onClick={() => setShowDriverModal(true)}>
-                    <span>+ Novo Motorista</span>
+                    <FaPlus className="btn-icon" /> <span>Novo Motorista</span>
                 </button>
-                <button className="btn-modern btn-red" onClick={logout}>Sair</button>
+                <button className="btn-modern btn-red" onClick={logout}>
+                    <FaSignOutAlt className="btn-icon" /> <span>Sair</span>
+                </button>
             </div>
 
             <div className="mapa-container">
@@ -120,7 +187,6 @@ const TransportadoraDashboard = () => {
                 <Mapa
                     latitude={localizacao?.latitude}
                     longitude={localizacao?.longitude}
-                    // Passamos o histórico completo para o componente Mapa
                     historico={historicoRota}
                     nomeMotorista={motoristaSelecionado?.fullname || motoristaSelecionado?.username || "Selecione um motorista"}
                     dataHora={localizacao?.dataHora}
@@ -130,7 +196,7 @@ const TransportadoraDashboard = () => {
             {showDriverModal && (
                 <RegisterDriverModal
                     onClose={() => setShowDriverModal(false)}
-                    onSuccess={() => fetchMotoristas()}
+                    onSuccess={() => fetchMotoristas(page)}
                 />
             )}
         </div>

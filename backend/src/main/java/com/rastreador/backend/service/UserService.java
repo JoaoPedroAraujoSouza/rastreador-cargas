@@ -11,6 +11,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.rastreador.backend.dto.UserUpdateDTO;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,41 +40,33 @@ public class UserService {
         return UserResponseDTO.fromEntity(savedUser);
     }
 
-    // Listagem inteligente baseada no contexto do usuário logado
-    public List<UserResponseDTO> listUsersByContext(String currentUsername) {
+    public Page<UserResponseDTO> listUsersByContext(String currentUsername, Pageable pageable) {
         User currentUser = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new UserNotFoundException("Usuário atual não encontrado"));
 
         List<User> users;
 
         if (currentUser.getUserType() == UserType.SUPER_ADMIN) {
-            users = userRepository.findByUserType(UserType.ADMIN);
+           return userRepository.findByUserType(UserType.ADMIN, pageable)
+                   .map(UserResponseDTO::fromEntity);
         }
         else if (currentUser.getUserType() == UserType.ADMIN) {
-            users = userRepository.findByManager(currentUser);
+            return userRepository.findByManager(currentUser, pageable).map(UserResponseDTO::fromEntity);
         }
         else {
-            users = Collections.emptyList();
+            return Page.empty(pageable);
         }
-
-        return users.stream()
-                .map(UserResponseDTO::fromEntity)
-                .toList();
     }
 
-    // --- NOVO MÉTODO: BUSCAR MOTORISTAS POR ID DO GERENTE (PARA O SUPER ADMIN) ---
     public List<UserResponseDTO> getDriversByManagerId(Long managerId) {
         User manager = userRepository.findById(managerId)
                 .orElseThrow(() -> new UserNotFoundException("Transportadora não encontrada com ID: " + managerId));
 
-        // Reutiliza o método do repositório que busca filhos pelo pai (manager)
-        List<User> drivers = userRepository.findByManager(manager);
-
-        return drivers.stream()
+        return userRepository.findByManager(manager, Pageable.unpaged()).getContent()
+                .stream()
                 .map(UserResponseDTO::fromEntity)
                 .toList();
     }
-    // -----------------------------------------------------------------------------
 
     @Transactional
     public List<UserResponseDTO> getAllUsers() {

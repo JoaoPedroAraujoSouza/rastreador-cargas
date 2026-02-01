@@ -2,6 +2,10 @@ package com.rastreador.backend.controller;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +24,7 @@ import com.rastreador.backend.dto.UserUpdateDTO;
 import com.rastreador.backend.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,22 +46,25 @@ public class UserController {
     }
 
     @GetMapping
-    @Operation(summary = "Get users based on role", description = "Returns all users for Super Admin, or only managed drivers for Admin")
-    public ResponseEntity<List<UserResponseDTO>> getUsers() {
+    @Operation(summary = "Get users (paginated)", description = "Returns paginated users based on role")
+    public ResponseEntity<Page<UserResponseDTO>> getUsers(
+            @Parameter(hidden = true)
+            @PageableDefault(size = 10, page = 0, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = auth.getName();
-        log.info("Listing users for: {}", currentUsername);
-        List<UserResponseDTO> users = userService.listUsersByContext(currentUsername);
+
+        log.info("Listing users (page {}) for: {}", pageable.getPageNumber(), currentUsername);
+
+        Page<UserResponseDTO> users = userService.listUsersByContext(currentUsername, pageable);
         return ResponseEntity.ok(users);
     }
 
-    // --- NOVO ENDPOINT: LISTAR MOTORISTAS DE UMA TRANSPORTADORA ESPECÍFICA ---
     @GetMapping("/{managerId}/drivers")
     @Operation(summary = "Get drivers by manager ID (Super Admin feature)")
     public ResponseEntity<List<UserResponseDTO>> getDriversByManager(@PathVariable Long managerId) {
         return ResponseEntity.ok(userService.getDriversByManagerId(managerId));
     }
-    // -------------------------------------------------------------------------
 
     @GetMapping("/username/{username}")
     public ResponseEntity<UserResponseDTO> getUserByUsername(@PathVariable String username) {
