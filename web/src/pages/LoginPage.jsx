@@ -49,17 +49,14 @@ const LoginPage = () => {
                         <div className="form-group">
                             <label>Usuário Corporativo</label>
                             <div className="input-wrapper">
-                                {/* O ícone só aparece se o campo estiver vazio */}
-                                <FaUser
-                                    className="input-icon"
-                                    style={{ display: username ? 'none' : 'block' }}
-                                />
+                                {/* Ícone Fixo - Removida a lógica de display: none */}
+                                <FaUser className="input-icon" />
+
                                 <input
                                     type="text"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
-                                    // Placeholder descritivo e moderno
-                                    placeholder={username ? "" : "Ex: transportadora_exemplo"}
+                                    placeholder="Ex: transportadora_exemplo"
                                     required
                                     autoFocus
                                 />
@@ -69,16 +66,14 @@ const LoginPage = () => {
                         <div className="form-group">
                             <label>Senha</label>
                             <div className="input-wrapper">
-                                {/* O ícone só aparece se o campo estiver vazio */}
-                                <FaLock
-                                    className="input-icon"
-                                    style={{ display: password ? 'none' : 'block' }}
-                                />
+                                {/* Ícone Fixo */}
+                                <FaLock className="input-icon" />
+
                                 <input
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder={password ? "" : "Sua senha de acesso"}
+                                    placeholder="••••••••"
                                     required
                                 />
                             </div>

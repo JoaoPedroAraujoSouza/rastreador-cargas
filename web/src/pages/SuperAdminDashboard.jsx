@@ -1,32 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getUsers } from '../services/api';
+import { getUsers, deleteUser } from '../services/api';
 import RegisterCompanyModal from '../components/RegisterCompanyModal';
-import { FaBuilding, FaPlus, FaSearch, FaSignOutAlt, FaNetworkWired } from 'react-icons/fa';
+import EditCompanyModal from '../components/EditCompanyModal';
+import ViewDriversModal from '../components/ViewDriversModal'; // <--- NOVO IMPORT
+import { FaBuilding, FaPlus, FaSearch, FaSignOutAlt, FaNetworkWired, FaTrash, FaEdit, FaEye } from 'react-icons/fa'; // <--- FaEye
 import './SuperAdminDashboard.css';
 
 const SuperAdminDashboard = () => {
     const { user, logout } = useAuth();
     const [companies, setCompanies] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showModal, setShowModal] = useState(false);
+
+    // Estados dos Modais
+    const [showRegisterModal, setShowRegisterModal] = useState(false);
+    const [editingCompany, setEditingCompany] = useState(null);
+    const [viewingCompany, setViewingCompany] = useState(null); // <--- ESTADO PARA VISUALIZAR FROTA
+
     const [busca, setBusca] = useState('');
 
     const fetchCompanies = async () => {
         try {
             setLoading(true);
-
-            // O Backend agora retorna EXATAMENTE o que precisamos (apenas ADMINs)
-            // graças ao método listUsersByContext no UserController
             const data = await getUsers();
-
-            console.log("Transportadoras carregadas:", data);
-
-            // Verificação de segurança: Se vier vazio, loga para ajudar no debug
-            if (data.length === 0) {
-                console.warn("Nenhuma transportadora retornada pela API. Verifique se o DataSeeder rodou.");
-            }
-
             setCompanies(data);
         } catch (error) {
             console.error("Erro ao buscar empresas:", error);
@@ -39,7 +35,27 @@ const SuperAdminDashboard = () => {
         fetchCompanies();
     }, []);
 
-    // Filtro local apenas para a barra de pesquisa (Nome ou CNPJ)
+    const handleDelete = async (id, name) => {
+        if (window.confirm(`ATENÇÃO: Deseja excluir a transportadora "${name}"?`)) {
+            try {
+                await deleteUser(id);
+                setCompanies(prev => prev.filter(c => c.id !== id));
+            } catch (error) {
+                console.error("Erro ao excluir:", error);
+                alert("Erro ao excluir. Verifique dependências.");
+            }
+        }
+    };
+
+    const handleEditClick = (company) => {
+        setEditingCompany(company);
+    };
+
+    // --- ABRIR MODAL DE FROTA ---
+    const handleViewFleet = (company) => {
+        setViewingCompany(company);
+    };
+
     const filteredCompanies = companies.filter(c =>
         (c.fullname && c.fullname.toLowerCase().includes(busca.toLowerCase())) ||
         (c.document && c.document.includes(busca))
@@ -82,28 +98,29 @@ const SuperAdminDashboard = () => {
                         <FaSearch />
                         <input
                             type="text"
-                            placeholder="Pesquisar transportadora ou CNPJ..."
+                            placeholder="Pesquisar transportadora..."
                             value={busca}
                             onChange={(e) => setBusca(e.target.value)}
                         />
                     </div>
-                    <button className="btn-new-company" onClick={() => setShowModal(true)}>
+                    <button className="btn-new-company" onClick={() => setShowRegisterModal(true)}>
                         <FaPlus /> Nova Transportadora
                     </button>
                 </div>
 
                 <div className="table-container">
                     {loading ? (
-                        <div className="empty-state">Carregando dados do sistema...</div>
+                        <div className="empty-state">Carregando...</div>
                     ) : (
                         <table>
                             <thead>
                             <tr>
-                                <th>Empresa / Razão Social</th>
-                                <th>Usuário Mestre</th>
+                                <th>Empresa</th>
+                                <th>Usuário</th>
                                 <th>CNPJ</th>
-                                <th>Email Corporativo</th>
+                                <th>Email</th>
                                 <th>Status</th>
+                                <th style={{textAlign: 'center'}}>Ações</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -114,19 +131,38 @@ const SuperAdminDashboard = () => {
                                         <td>{company.username}</td>
                                         <td>{company.document}</td>
                                         <td>{company.email}</td>
-                                        <td>
-                                            <span className="badge-status active">Ativo</span>
+                                        <td><span className="badge-status active">Ativo</span></td>
+                                        <td style={{textAlign: 'center'}}>
+
+                                            {/* BOTÃO VER FROTA (NOVO) */}
+                                            <button
+                                                className="btn-action view"
+                                                title="Ver Frota de Motoristas"
+                                                onClick={() => handleViewFleet(company)}
+                                            >
+                                                <FaEye />
+                                            </button>
+
+                                            <button
+                                                className="btn-action edit"
+                                                title="Editar Transportadora"
+                                                onClick={() => handleEditClick(company)}
+                                            >
+                                                <FaEdit />
+                                            </button>
+
+                                            <button
+                                                className="btn-action delete"
+                                                title="Excluir"
+                                                onClick={() => handleDelete(company.id, company.fullname)}
+                                            >
+                                                <FaTrash />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
-                                <tr>
-                                    <td colSpan="5" className="empty-state">
-                                        {companies.length === 0
-                                            ? "Nenhuma transportadora encontrada no sistema."
-                                            : "Nenhum resultado para a busca."}
-                                    </td>
-                                </tr>
+                                <tr><td colSpan="6" className="empty-state">Nenhum resultado.</td></tr>
                             )}
                             </tbody>
                         </table>
@@ -134,10 +170,26 @@ const SuperAdminDashboard = () => {
                 </div>
             </main>
 
-            {showModal && (
+            {showRegisterModal && (
                 <RegisterCompanyModal
-                    onClose={() => setShowModal(false)}
+                    onClose={() => setShowRegisterModal(false)}
                     onSuccess={fetchCompanies}
+                />
+            )}
+
+            {editingCompany && (
+                <EditCompanyModal
+                    company={editingCompany}
+                    onClose={() => setEditingCompany(null)}
+                    onSuccess={fetchCompanies}
+                />
+            )}
+
+            {/* Modal de Visualização de Frota */}
+            {viewingCompany && (
+                <ViewDriversModal
+                    company={viewingCompany}
+                    onClose={() => setViewingCompany(null)}
                 />
             )}
         </div>

@@ -41,7 +41,7 @@ export const getUsers = async () => {
 // --- ATUALIZADO PARA REPLAY ---
 export const getLocalizacaoHistorico = async (userId) => {
   try {
-    // Adicionado ?size=100 para pegar mais pontos para o replay
+
     const response = await api.get(`/localizations/user/${userId}?size=100`);
     return response.data.content || [];
   } catch (error) {
@@ -49,5 +49,18 @@ export const getLocalizacaoHistorico = async (userId) => {
     return [];
   }
 };
+export const deleteUser = async (id) => {
+  await api.delete(`/users/${id}`);
+};
 
+export const updateUser = async (id, userData) => {
+  // Conecta com o endpoint @PutMapping("/{id}") do UserController
+  const response = await api.put(`/users/${id}`, userData);
+  return response.data;
+};
+
+export const getDriversByManager = async (managerId) => {
+  const response = await api.get(`/users/${managerId}/drivers`);
+  return response.data;
+};
 export default api;

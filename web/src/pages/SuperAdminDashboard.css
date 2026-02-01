@@ -300,3 +300,41 @@ td {
     padding: 50px;
     color: var(--text-grey);
 }
+
+.btn-action {
+    background: transparent;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    margin: 0 4px;
+}
+
+.btn-action.edit {
+    color: #f39c12; /* Laranja para editar */
+    background-color: rgba(243, 156, 18, 0.1);
+}
+.btn-action.edit:hover {
+    background-color: #f39c12;
+    color: white;
+}
+
+.btn-action.delete {
+    color: #e74c3c; /* Vermelho para excluir */
+    background-color: rgba(231, 76, 60, 0.1);
+}
+.btn-action.delete:hover {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-action.view {
+    color: #3498db; /* Azul */
+    background-color: rgba(52, 152, 219, 0.1);
+}
+.btn-action.view:hover {
+    background-color: #3498db;
+    color: white;
+}

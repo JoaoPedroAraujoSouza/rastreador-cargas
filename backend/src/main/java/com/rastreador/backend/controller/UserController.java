@@ -41,18 +41,22 @@ public class UserController {
     }
 
     @GetMapping
-    @Operation(summary = "Get users based on role", description = "Returns ADMINs for Super Admin, or Drivers for Admin")
+    @Operation(summary = "Get users based on role", description = "Returns all users for Super Admin, or only managed drivers for Admin")
     public ResponseEntity<List<UserResponseDTO>> getUsers() {
-
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = auth.getName();
-
-        log.info("Solicitação de listagem de usuários por: {}", currentUsername);
-
+        log.info("Listing users for: {}", currentUsername);
         List<UserResponseDTO> users = userService.listUsersByContext(currentUsername);
-
         return ResponseEntity.ok(users);
     }
+
+    // --- NOVO ENDPOINT: LISTAR MOTORISTAS DE UMA TRANSPORTADORA ESPECÍFICA ---
+    @GetMapping("/{managerId}/drivers")
+    @Operation(summary = "Get drivers by manager ID (Super Admin feature)")
+    public ResponseEntity<List<UserResponseDTO>> getDriversByManager(@PathVariable Long managerId) {
+        return ResponseEntity.ok(userService.getDriversByManagerId(managerId));
+    }
+    // -------------------------------------------------------------------------
 
     @GetMapping("/username/{username}")
     public ResponseEntity<UserResponseDTO> getUserByUsername(@PathVariable String username) {

@@ -38,7 +38,7 @@ public class UserService {
         return UserResponseDTO.fromEntity(savedUser);
     }
 
-    // --- MÉTODO DE LISTAGEM INTELIGENTE ---
+    // Listagem inteligente baseada no contexto do usuário logado
     public List<UserResponseDTO> listUsersByContext(String currentUsername) {
         User currentUser = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new UserNotFoundException("Usuário atual não encontrado"));
@@ -46,15 +46,12 @@ public class UserService {
         List<User> users;
 
         if (currentUser.getUserType() == UserType.SUPER_ADMIN) {
-
             users = userRepository.findByUserType(UserType.ADMIN);
         }
         else if (currentUser.getUserType() == UserType.ADMIN) {
-
             users = userRepository.findByManager(currentUser);
         }
         else {
-            // Motorista não vê lista de usuários
             users = Collections.emptyList();
         }
 
@@ -62,6 +59,20 @@ public class UserService {
                 .map(UserResponseDTO::fromEntity)
                 .toList();
     }
+
+    // --- NOVO MÉTODO: BUSCAR MOTORISTAS POR ID DO GERENTE (PARA O SUPER ADMIN) ---
+    public List<UserResponseDTO> getDriversByManagerId(Long managerId) {
+        User manager = userRepository.findById(managerId)
+                .orElseThrow(() -> new UserNotFoundException("Transportadora não encontrada com ID: " + managerId));
+
+        // Reutiliza o método do repositório que busca filhos pelo pai (manager)
+        List<User> drivers = userRepository.findByManager(manager);
+
+        return drivers.stream()
+                .map(UserResponseDTO::fromEntity)
+                .toList();
+    }
+    // -----------------------------------------------------------------------------
 
     @Transactional
     public List<UserResponseDTO> getAllUsers() {
