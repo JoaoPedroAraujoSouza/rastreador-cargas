@@ -3,6 +3,7 @@ export const Colors = {
   success: '#1bc5bd',
   danger: '#f64e60',
   darkBg: '#1e1e2d',
+  darkBg2: '#2d3748',
   textWhite: '#ffffff',
   
   gradients: {
@@ -20,6 +21,8 @@ export const Colors = {
   overlay: 'rgba(0, 0, 0, 0.5)',
   cardBg: 'rgba(30, 30, 45, 0.9)',
   borderLight: 'rgba(255, 255, 255, 0.1)',
+  borderGray: 'rgba(255, 255, 255, 0.1)',
+  successColor: '#1bc5bd',
 } as const;
 
 export default Colors;

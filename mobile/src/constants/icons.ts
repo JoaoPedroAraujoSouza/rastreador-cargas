@@ -7,6 +7,8 @@ export const AppIcons = {
   user: 'account-circle',
   eyeOn: 'eye',
   eyeOff: 'eye-off',
+  settings: 'cog',
+  history: 'history',
 } as const;
 
 export type IconName = typeof AppIcons[keyof typeof AppIcons];
