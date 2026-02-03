@@ -33,7 +33,6 @@ public class LocalizationService {
         localization.setLatitude(dto.latitude());
         localization.setLongitude(dto.longitude());
 
-// Se o app mandou a hora, usa. Se não, usa a do servidor.
         if (dto.timestamp() != null) {
             localization.setTimestamp(dto.timestamp());
         } else {

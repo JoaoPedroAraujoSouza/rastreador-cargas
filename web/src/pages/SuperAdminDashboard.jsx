@@ -30,10 +30,9 @@ const SuperAdminDashboard = () => {
     const fetchCompanies = async (currentPage = 0) => {
         try {
             setLoading(true);
-            // Chama a API passando a página atual
+
             const data = await getUsers(currentPage, PAGE_SIZE);
 
-            // O Backend agora retorna um objeto Page, a lista real está em 'content'
             setCompanies(data.content || []);
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);
@@ -46,7 +45,6 @@ const SuperAdminDashboard = () => {
         }
     };
 
-    // Recarrega sempre que a página muda
     useEffect(() => {
         fetchCompanies(page);
     }, [page]);
@@ -61,7 +59,6 @@ const SuperAdminDashboard = () => {
         if (window.confirm(`ATENÇÃO: Deseja excluir a transportadora "${name}"?`)) {
             try {
                 await deleteUser(id);
-                // Atualiza a lista mantendo a página atual
                 fetchCompanies(page);
                 alert("Transportadora removida com sucesso!");
             } catch (error) {
@@ -71,7 +68,6 @@ const SuperAdminDashboard = () => {
         }
     };
 
-    // Filtro local (Atenção: filtra apenas a PÁGINA ATUAL visualizada)
     const filteredCompanies = companies.filter(c =>
         (c.fullname && c.fullname.toLowerCase().includes(busca.toLowerCase())) ||
         (c.document && c.document.includes(busca))

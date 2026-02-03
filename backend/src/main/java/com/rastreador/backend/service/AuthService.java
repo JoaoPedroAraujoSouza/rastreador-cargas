@@ -6,7 +6,7 @@ import com.rastreador.backend.dto.UserCreateDTO;
 import com.rastreador.backend.enums.UserType;
 import com.rastreador.backend.model.User;
 import com.rastreador.backend.repository.UserRepository;
-import com.rastreador.backend.security.JwtUtil;
+import com.rastreador.backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.BadCredentialsException;

@@ -20,19 +20,14 @@ const TransportadoraDashboard = () => {
     const [loading, setLoading] = useState(false);
     const [setError] = useState(null);
 
-    // Estados de Paginação
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const PAGE_SIZE = 10;
-
-    // Estados de Controle
     const [isWsConnected, setIsWsConnected] = useState(false);
     const [showDriverModal, setShowDriverModal] = useState(false);
 
-    // Referência para a inscrição do WebSocket (Aqui está a variável que deu erro)
     const subscriptionRef = useRef(null);
 
-    // 1. Carrega lista de motoristas (Com Paginação)
     const fetchMotoristas = async (currentPage = 0) => {
         try {
             setLoading(true);
@@ -46,18 +41,12 @@ const TransportadoraDashboard = () => {
                 content = data;
                 total = 1;
             } else {
-                // API Real: Passamos page e size
                 data = await getUsers(currentPage, PAGE_SIZE);
-                // Ajuste para ler o formato Page do Spring Boot
                 content = data.content || [];
                 total = data.totalPages;
             }
 
-            const driversOnly = Array.isArray(content)
-                ? content.filter(u => u.userType === 'DRIVER')
-                : [];
-
-            setMotoristas(driversOnly);
+            setMotoristas(content);
             setTotalPages(total);
             setPage(currentPage);
 
@@ -69,14 +58,12 @@ const TransportadoraDashboard = () => {
         }
     };
 
-    // Função passada para a Sidebar controlar a página
     const handlePageChange = (newPage) => {
         if (newPage >= 0 && newPage < totalPages) {
             fetchMotoristas(newPage);
         }
     };
 
-    // 2. Conecta WebSocket e Carrega Inicial
     useEffect(() => {
         fetchMotoristas(0); // Carrega página 0
 
@@ -121,14 +108,11 @@ const TransportadoraDashboard = () => {
         };
         loadHistory();
 
-        // B. Assina WebSocket em tempo real (USO DO subscriptionRef)
         if (!USE_MOCK && isWsConnected) {
-            // Se já existe uma inscrição anterior, cancela ela
             if (subscriptionRef.current) {
                 subscriptionRef.current.unsubscribe();
             }
 
-            // Cria nova inscrição para o motorista selecionado
             subscriptionRef.current = WebSocketService.subscribeToDriver(motoristaSelecionado.id, (data) => {
                 setLocalizacao({
                     latitude: data.latitude,
@@ -143,7 +127,6 @@ const TransportadoraDashboard = () => {
             });
         }
 
-        // Cleanup: Cancela inscrição ao desmontar ou trocar de motorista
         return () => {
             if (subscriptionRef.current) {
                 subscriptionRef.current.unsubscribe();

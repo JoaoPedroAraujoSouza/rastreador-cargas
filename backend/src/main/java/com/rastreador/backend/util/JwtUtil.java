@@ -1,4 +1,4 @@
-package com.rastreador.backend.security;
+package com.rastreador.backend.util;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,5 +1,6 @@
 package com.rastreador.backend.security;
 
+import com.rastreador.backend.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

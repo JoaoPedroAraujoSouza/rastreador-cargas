@@ -4,7 +4,9 @@ import com.rastreador.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity // Habilita @PreAuthorize nos controllers
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -31,17 +34,30 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Login continua público
+                        // Rotas públicas
                         .requestMatchers("/api/auth/login").permitAll()
-
-                        // 2. Swagger e WebSocket públicos
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/ws-tracker/**").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
 
-                        // 3. REGISTRO AGORA EXIGE LOGIN (Para o AuthService saber quem é o pai)
+                        // Registro requer autenticação
                         .requestMatchers("/api/auth/register").authenticated()
 
-                        // 4. Todo o resto protegido
+                        // SUPER_ADMIN pode tudo
+                        .requestMatchers("/api/users/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
+
+                        // Apenas ADMIN e SUPER_ADMIN gerenciam veículos
+                        .requestMatchers(HttpMethod.POST, "/api/vehicles/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/vehicles/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/vehicles/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
+
+                        // DRIVER pode enviar localização
+                        .requestMatchers(HttpMethod.POST, "/api/localizations/**").hasAnyRole("DRIVER", "ADMIN", "SUPER_ADMIN")
+
+                        // Leitura de localizações para ADMIN e SUPER_ADMIN
+                        .requestMatchers(HttpMethod.GET, "/api/localizations/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+
+                        // Todo o resto precisa estar autenticado
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

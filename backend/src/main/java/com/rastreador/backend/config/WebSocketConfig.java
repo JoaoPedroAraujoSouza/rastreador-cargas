@@ -1,6 +1,6 @@
 package com.rastreador.backend.config;
 
-import com.rastreador.backend.security.JwtUtil;
+import com.rastreador.backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
