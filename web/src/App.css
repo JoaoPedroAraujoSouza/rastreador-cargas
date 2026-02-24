@@ -1,5 +1,112 @@
+/* Variáveis de cores (se não tiver, adicione no :root) */
+:root {
+  --primary-color: #3699ff;
+  --success-color: #1bc5bd;
+  --danger-color: #f64e60;
+  --dark-bg: #1e1e2d;
+  --text-white: #ffffff;
+}
+
+/* HEADER FLUTUANTE */
+.dashboard-header {
+  position: absolute;
+  top: 20px;
+  left: 340px; /* Largura da sidebar + 20px */
+  z-index: 1000;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: rgba(30, 30, 45, 0.9);
+  padding: 8px 15px;
+  border-radius: 12px;
+  backdrop-filter: blur(5px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.user-badge {
+  display: flex;
+  flex-direction: column;
+  margin-right: 10px;
+  color: #ffffff;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  padding-right: 15px;
+}
+
+.user-badge strong {
+  font-size: 14px;
+}
+
+.user-badge span {
+  font-size: 11px;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* BOTÕES MODERNOS */
+.btn-modern {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+.btn-modern:active {
+  transform: translateY(0);
+}
+
+.btn-purple {
+  background: linear-gradient(135deg, #8e44ad 0%, #6c3483 100%);
+}
+
+.btn-green {
+  background: linear-gradient(135deg, #1bc5bd 0%, #0bb7af 100%);
+}
+
+.btn-red {
+  background: linear-gradient(135deg, #f64e60 0%, #ee2d41 100%);
+}
+
 .app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  display: flex; /* Coloca Sidebar e Mapa lado a lado */
+  height: 100vh; /* Ocupa 100% da altura da tela */
+  width: 100vw; /* Ocupa 100% da largura */
+  overflow: hidden;
+}
+
+.mapa-container {
+  flex: 1;
+  position: relative;  /* Necessário para posicionar botões flutuantes dentro dele */
+  height: 100%;        /* Garante altura total */
+  background-color: #e4e6ef; /* Cor de fundo caso o mapa demore a carregar */
+  z-index: 1;
+}
+
+.loading-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  z-index: 2000;
+  font-weight: bold;
 }
