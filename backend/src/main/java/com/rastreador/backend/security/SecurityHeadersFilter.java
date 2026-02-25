@@ -12,13 +12,11 @@ public class SecurityHeadersFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         httpResponse.setHeader("X-Content-Type-Options", "nosniff");
-
         httpResponse.setHeader("X-Frame-Options", "DENY");
-
         httpResponse.setHeader("X-XSS-Protection", "1; mode=block");
-
         httpResponse.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
 
+        // Permite WebSockets, APIs externas, Imagens, Fontes e Scripts inline
         String cspPolicy = "default-src 'self'; " +
                 "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
                 "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
