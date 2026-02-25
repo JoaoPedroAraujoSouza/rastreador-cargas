@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // Habilita @PreAuthorize nos controllers
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -31,33 +31,29 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())
+                .cors(Customizer.withDefaults()) // Vai pegar o CorsFilter que criamos acima automaticamente
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Rotas públicas
+
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .requestMatchers("/api/auth/login").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/ws-tracker/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
 
-                        // Registro requer autenticação
                         .requestMatchers("/api/auth/register").authenticated()
 
-                        // SUPER_ADMIN pode tudo
                         .requestMatchers("/api/users/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
 
-                        // Apenas ADMIN e SUPER_ADMIN gerenciam veículos
                         .requestMatchers(HttpMethod.POST, "/api/vehicles/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/vehicles/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/vehicles/**").hasAnyRole("SUPER_ADMIN", "ADMIN")
 
-                        // DRIVER pode enviar localização
                         .requestMatchers(HttpMethod.POST, "/api/localizations/**").hasAnyRole("DRIVER", "ADMIN", "SUPER_ADMIN")
 
-                        // Leitura de localizações para ADMIN e SUPER_ADMIN
                         .requestMatchers(HttpMethod.GET, "/api/localizations/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
 
-                        // Todo o resto precisa estar autenticado
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
