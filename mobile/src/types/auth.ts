@@ -1,16 +1,19 @@
 export interface LoginRequest {
-  login: string;
-  senha: string;
+  username: string;
+  password: string;
 }
 
 export interface LoginResponse {
-  id: number;
-  nome: string;
   token: string;
+  type: string;
+  username: string;
+  userType: string;
+  id: number;
 }
 
 export interface MotoristaData {
   id: number;
-  nome: string;
+  username: string;
   token: string;
+  userType: string;
 }
