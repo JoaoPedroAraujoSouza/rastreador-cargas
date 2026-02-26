@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { loginMotorista } from '../services/auth';
-import { saveMotoristaData } from '../services/storage';
 import { getErrorMessage, isAxiosError } from '../utils/error-handler';
 import { logger } from '../utils/logger';
 import { MESSAGES } from '../constants/config';
+import { useAuth } from '../context/AuthContext';
 
 interface UseLoginReturn {
   login: string;
@@ -19,10 +19,11 @@ export const useLogin = (onSuccess?: (nome: string) => void): UseLoginReturn => 
   const [login, setLogin] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
+  const { signIn } = useAuth();
 
   const handleLogin = async () => {
     if (!login.trim() || !senha.trim()) {
-      Alert.alert(MESSAGES.TITLES.ATTENTION, MESSAGES.AUTH.EMPTY_FIELDS);
+      Toast.show({ type: 'error', text1: MESSAGES.TITLES.ATTENTION, text2: MESSAGES.AUTH.EMPTY_FIELDS });
       return;
     }
 
@@ -30,24 +31,29 @@ export const useLogin = (onSuccess?: (nome: string) => void): UseLoginReturn => 
 
     try {
       const motoristaData = await loginMotorista({
-        login: login.trim(),
-        senha: senha,
+        username: login.trim(),
+        password: senha,
       });
 
-      await saveMotoristaData(motoristaData);
+      if (motoristaData.userType !== 'DRIVER') {
+        Toast.show({ type: 'error', text1: MESSAGES.TITLES.LOGIN_ERROR, text2: MESSAGES.AUTH.DRIVER_ONLY });
+        return;
+      }
+
+      await signIn(motoristaData);
 
       if (onSuccess) {
-        onSuccess(motoristaData.nome);
+        onSuccess(motoristaData.username);
       }
     } catch (error: unknown) {
       logger.error('Erro no login:', error);
 
       const message = getErrorMessage(error);
-      const title = isAxiosError(error) && error.response 
+      const title = isAxiosError(error) && error.response
         ? MESSAGES.TITLES.LOGIN_ERROR
         : MESSAGES.TITLES.CONNECTION_ERROR;
-      
-      Alert.alert(title, message);
+
+      Toast.show({ type: 'error', text1: title, text2: message });
     } finally {
       setLoading(false);
     }

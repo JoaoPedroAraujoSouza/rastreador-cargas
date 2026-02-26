@@ -3,31 +3,25 @@ import {
   View,
   Text,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
 import Colors from '@/src/styles/colors';
 import { AppIcons, MESSAGES } from '@/src/constants';
 import { Button, Input, Card, Icon } from '@/src/components/ui';
 import { useLogin } from '@/src/hooks/useLogin';
 
 export default function LoginScreen() {
-  const router = useRouter();
-  
   const { login, senha, loading, setLogin, setSenha, handleLogin } = useLogin(
-    (nome) => {
-      const message = MESSAGES.AUTH.LOGIN_SUCCESS.replace('{nome}', nome);
-      Alert.alert(MESSAGES.TITLES.SUCCESS, message, [
-        {
-          text: 'OK',
-          onPress: () => {
-            router.replace('/home');
-          },
-        },
-      ]);
+    (username) => {
+      const message = MESSAGES.AUTH.LOGIN_SUCCESS.replace('{nome}', username);
+      Toast.show({
+        type: 'success',
+        text1: MESSAGES.TITLES.SUCCESS,
+        text2: message,
+      });
     }
   );
 
@@ -46,15 +40,15 @@ export default function LoginScreen() {
               style={styles.icon}
             />
             <Text style={styles.title}>Rastreador</Text>
-            <Text style={styles.subtitle}>Sistema de Rastreamento de Cargas</Text>
+            <Text style={styles.subtitle}>Cargo Tracking System</Text>
           </View>
 
           <Card>
-            <Text style={styles.cardTitle}>Login do Motorista</Text>
+            <Text style={styles.cardTitle}>Driver Login</Text>
 
             <Input
-              label="Usuário"
-              placeholder="Digite seu usuário"
+              label="Username"
+              placeholder="Enter your username"
               value={login}
               onChangeText={setLogin}
               autoCapitalize="none"
@@ -63,8 +57,8 @@ export default function LoginScreen() {
             />
 
             <Input
-              label="Senha"
-              placeholder="Digite sua senha"
+              label="Password"
+              placeholder="Enter your password"
               value={senha}
               onChangeText={setSenha}
               isPassword
@@ -74,14 +68,14 @@ export default function LoginScreen() {
             />
 
             <Button
-              title="ENTRAR"
+              title="SIGN IN"
               onPress={handleLogin}
               loading={loading}
               variant="green"
             />
           </Card>
 
-          <Text style={styles.footer}>App do Motorista v1.0</Text>
+          <Text style={styles.footer}>Driver App v1.0</Text>
         </View>
       </KeyboardAvoidingView>
     </LinearGradient>
